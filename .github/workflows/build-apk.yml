@@ -12,15 +12,20 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Restore stable Android debug signing key
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: suishou-accounting-debug-keystore-v1
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
       - name: Build APK
         run: gradle --no-daemon assembleDebug
       - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk SuiShou-Accounting-V2.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk SuiShou-Accounting-V2.2.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: SuiShou-Accounting-V2-APK
-          path: SuiShou-Accounting-V2.apk
+          name: SuiShou-Accounting-V2.2-APK
+          path: SuiShou-Accounting-V2.2.apk
           if-no-files-found: error
