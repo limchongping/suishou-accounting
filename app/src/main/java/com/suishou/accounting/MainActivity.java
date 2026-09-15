@@ -2,6 +2,7 @@ package com.suishou.accounting;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Build;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -24,7 +25,6 @@ public class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             window.getDecorView().setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
-        // Do not draw the WebView behind the system status/navigation bars.
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
@@ -61,7 +61,6 @@ public class MainActivity extends Activity {
             }
         }
 
-        // Compatibility with V2 HTML.
         @JavascriptInterface public void shareCsv(String text) { exportCsv(text); }
     }
 }
