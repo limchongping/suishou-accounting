@@ -18,7 +18,7 @@
   <div class="search-wrap"><div class="search"><span>⌕</span><input id="searchInput" placeholder="搜索标题、正文、清单或文件名" autocomplete="off" /><button class="x" id="clearSearch">×</button></div></div>
   <div class="filters" id="filters"></div>
   <div class="folder-path" id="folderPath" hidden></div>
-  <main class="content"><div class="list" id="noteList"></div><button class="fab" id="addBtn" aria-label="新建笔记">＋</button></main>
+  <main class="content"><div class="list list-view" id="noteList"></div><button class="fab" id="addBtn" aria-label="新建笔记">＋</button></main>
 </div>
 
 <div class="editor" id="editor">
@@ -27,14 +27,21 @@
     <button class="back" id="backBtn">‹</button>
     <div class="save-state" id="saveState">已保存到本机</div>
     <div class="editor-actions">
-      <button class="small-btn" id="lockBtn" title="密码锁">♙</button>
+      <button class="small-btn" id="lockBtn" title="加密锁">♙</button>
       <button class="small-btn" id="pinBtn" title="置顶">☆</button>
     </div>
   </div>
   <div class="editor-scroll">
     <input class="title-input" id="titleInput" placeholder="标题" maxlength="120" />
     <button class="folder-field" id="editorFolderBtn"><span>▤</span><span id="editorFolderText">未分类</span><span class="chev">›</span></button>
-    <textarea class="body-input" id="bodyInput" placeholder="从这里开始记录…"></textarea>
+    <div class="rich-toolbar" id="richToolbar">
+      <button data-cmd="bold"><b>B</b></button>
+      <button data-cmd="formatBlock" data-value="h2">H</button>
+      <button data-cmd="hiliteColor" data-value="#fff2a8">▰</button>
+      <button data-cmd="insertUnorderedList">• 列表</button>
+      <button data-cmd="removeFormat">清除格式</button>
+    </div>
+    <div class="body-rich" id="bodyInput" contenteditable="true" data-placeholder="从这里开始记录…"></div>
 
     <section class="block-section" id="todoSection" hidden>
       <div class="section-head"><strong>清单待办</strong><button class="mini-link" id="addTodoBtn">＋ 添加</button></div>
@@ -55,12 +62,14 @@
 </div>
 
 <div class="overlay" id="menuOverlay"><div class="sheet"><div class="handle"></div><div class="sheet-title">设置与数据</div>
-  <button class="menu-item" id="themeBtn"><div class="menu-icon">◐</div><div class="menu-text"><div class="menu-main">深色模式</div><div class="menu-sub" id="themeSub">跟随当前设置</div></div><span id="themeState">关闭</span></button>
-  <button class="menu-item" id="foldersMenuBtn"><div class="menu-icon">▤</div><div class="menu-text"><div class="menu-main">多级文件夹</div><div class="menu-sub">创建、进入或管理层级目录</div></div><span>›</span></button>
-  <button class="menu-item" id="trashBtn"><div class="menu-icon">⌫</div><div class="menu-text"><div class="menu-main">回收站</div><div class="menu-sub" id="trashSub">0 条已删除笔记</div></div><span>›</span></button>
-  <button class="menu-item" id="exportBtn"><div class="menu-icon">⇩</div><div class="menu-text"><div class="menu-main">导出备份</div><div class="menu-sub">笔记、文件夹、清单及附件一起备份</div></div><span>›</span></button>
-  <button class="menu-item" id="importBtn"><div class="menu-icon">⇧</div><div class="menu-text"><div class="menu-main">恢复备份</div><div class="menu-sub">从本机备份文件恢复</div></div><span>›</span></button>
-  <div class="menu-item static"><div class="menu-icon">⌁</div><div class="menu-text"><div class="menu-main">纯本地模式</div><div class="menu-sub">不申请 INTERNET 权限，不联网同步</div></div><span>✓</span></div>
+  <button class="menu-item" id="themeBtn"><div class="menu-icon">◐</div><div class="menu-text"><div class="menu-main">深色模式</div><div class="menu-sub" id="themeSub">当前使用浅色界面</div></div><span class="menu-end" id="themeState">关闭</span></button>
+  <button class="menu-item" id="viewBtn"><div class="menu-icon">▦</div><div class="menu-text"><div class="menu-main">首页显示</div><div class="menu-sub">在列表模式和卡片模式之间切换</div></div><span class="menu-end" id="viewState">列表</span></button>
+  <button class="menu-item" id="biometricBtn"><div class="menu-icon">◎</div><div class="menu-text"><div class="menu-main">应用生物识别锁</div><div class="menu-sub" id="biometricSub">启动应用时验证指纹、人脸或锁屏凭据</div></div><span class="menu-end" id="biometricState">关闭</span></button>
+  <button class="menu-item" id="foldersMenuBtn"><div class="menu-icon">▤</div><div class="menu-text"><div class="menu-main">多级文件夹</div><div class="menu-sub">创建、进入或管理层级目录</div></div><span class="menu-end">›</span></button>
+  <button class="menu-item" id="trashBtn"><div class="menu-icon">⌫</div><div class="menu-text"><div class="menu-main">回收站</div><div class="menu-sub" id="trashSub">0 条已删除笔记</div></div><span class="menu-end">›</span></button>
+  <button class="menu-item" id="exportBtn"><div class="menu-icon">⇩</div><div class="menu-text"><div class="menu-main">导出备份</div><div class="menu-sub">笔记、文件夹、清单及附件一起备份</div></div><span class="menu-end">›</span></button>
+  <button class="menu-item" id="importBtn"><div class="menu-icon">⇧</div><div class="menu-text"><div class="menu-main">恢复备份</div><div class="menu-sub">从本机备份文件恢复</div></div><span class="menu-end">›</span></button>
+  <div class="menu-item static"><div class="menu-icon">⌁</div><div class="menu-text"><div class="menu-main">纯本地模式</div><div class="menu-sub">不申请 INTERNET 权限，不联网同步</div></div><span class="menu-end">✓</span></div>
 </div></div>
 
 <div class="overlay" id="folderOverlay"><div class="sheet tall"><div class="handle"></div><div class="sheet-title-row"><div><div class="sheet-title">文件夹</div><div class="sheet-caption">支持多级目录；点文件夹进入，＋创建子文件夹</div></div><button class="round-add" id="addRootFolder">＋</button></div><div class="folder-tree" id="folderTree"></div></div></div>
