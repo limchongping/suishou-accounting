@@ -13,11 +13,25 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Restore stable Android debug signing key
+      - name: Restore Local Notes signing key
         uses: actions/cache@v4
         with:
-          path: ~/.android/debug.keystore
-          key: suishou-accounting-debug-keystore-v1
+          path: signing/debug.keystore
+          key: local-notes-v25-signing-v1
+      - name: Ensure Local Notes signing key
+        run: |
+          mkdir -p signing
+          if [ ! -f signing/debug.keystore ]; then
+            keytool -genkeypair -v \
+              -keystore signing/debug.keystore \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -dname "CN=Local Notes,O=Offline Apps,C=CN" \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000
+          fi
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
