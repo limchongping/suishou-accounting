@@ -24,9 +24,9 @@ jobs:
       - name: Build APK
         run: gradle --no-daemon assembleDebug
       - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk LocalNotes-V1.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk LocalNotes-V2.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: LocalNotes-V1-APK
-          path: LocalNotes-V1.apk
+          name: LocalNotes-V2-APK
+          path: LocalNotes-V2.apk
           if-no-files-found: error
