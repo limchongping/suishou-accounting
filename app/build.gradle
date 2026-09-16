@@ -1,5 +1,14 @@
 plugins { id 'com.android.application' }
 
-android { namespace 'com.suishou.accounting'; compileSdk 35
-    defaultConfig { applicationId 'com.suishou.accounting'; minSdk 23; targetSdk 35; versionCode 4; versionName '2.2' }
+android {
+    namespace 'com.suishou.notes'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.suishou.notes'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+    }
 }
