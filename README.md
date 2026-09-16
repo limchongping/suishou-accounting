@@ -1,11 +1,7 @@
-# 随手记账 V2
+# 随手笔记 V1
 
-安卓离线记账应用。
+纯本地 Android 笔记应用。应用不申请 INTERNET 权限，并关闭 Android 自动云备份。
 
-## 自动生成 APK
+功能：新建、编辑、自动保存、删除、搜索、分类、置顶、JSON 备份与恢复。
 
-推送到 `main` 分支后，GitHub Actions 会自动编译 APK。
-
-也可以在 **Actions → Build SuiShou APK → Run workflow** 手动触发。
-
-构建成功后下载 Artifact：`SuiShou-Accounting-V2-APK`，其中包含 `SuiShou-Accounting-V2.apk`。
+开发分支：`local-notes-v1`
