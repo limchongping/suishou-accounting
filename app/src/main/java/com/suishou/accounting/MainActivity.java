@@ -45,11 +45,11 @@ import java.util.concurrent.Executor;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.UserNotAuthenticatedException;
 import javax.crypto.spec.GCMParameterSpec;
 
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.security.keystore.UserNotAuthenticatedException;
 
 public class MainActivity extends FragmentActivity {
     private static final int REQ_EXPORT = 201;
