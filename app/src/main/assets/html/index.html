@@ -3,42 +3,72 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-<meta name="color-scheme" content="light" />
+<meta name="color-scheme" content="light dark" />
 <title>随手笔记</title>
 <link rel="stylesheet" href="app.css" />
 </head>
 <body>
-<div class="app">
+<div class="app" id="appRoot">
+  <div class="top-safe" aria-hidden="true"></div>
   <header class="topbar">
     <div class="brand"><div class="logo">记</div><div class="brand-text"><div class="brand-title">随手笔记</div><div class="brand-sub" id="countText">本地保存 · 0 条</div></div></div>
+    <button class="icon-btn" id="folderBtn" aria-label="文件夹">▤</button>
     <button class="icon-btn" id="menuBtn" aria-label="更多">⋯</button>
   </header>
-  <div class="search-wrap"><div class="search"><span>⌕</span><input id="searchInput" placeholder="搜索标题、内容或分类" autocomplete="off" /><button class="x" id="clearSearch">×</button></div></div>
+  <div class="search-wrap"><div class="search"><span>⌕</span><input id="searchInput" placeholder="搜索标题、正文、清单或文件名" autocomplete="off" /><button class="x" id="clearSearch">×</button></div></div>
   <div class="filters" id="filters"></div>
+  <div class="folder-path" id="folderPath" hidden></div>
   <main class="content"><div class="list" id="noteList"></div><button class="fab" id="addBtn" aria-label="新建笔记">＋</button></main>
 </div>
 
 <div class="editor" id="editor">
+  <div class="editor-safe" aria-hidden="true"></div>
   <div class="editorbar">
     <button class="back" id="backBtn">‹</button>
     <div class="save-state" id="saveState">已保存到本机</div>
-    <div class="editor-actions"><button class="small-btn" id="pinBtn" title="置顶">☆</button></div>
+    <div class="editor-actions">
+      <button class="small-btn" id="lockBtn" title="密码锁">♙</button>
+      <button class="small-btn" id="pinBtn" title="置顶">☆</button>
+    </div>
   </div>
   <div class="editor-scroll">
     <input class="title-input" id="titleInput" placeholder="标题" maxlength="120" />
-    <input class="category-input" id="categoryInput" placeholder="分类（可选，例如：工作 / 灵感 / 待办）" maxlength="40" />
+    <button class="folder-field" id="editorFolderBtn"><span>▤</span><span id="editorFolderText">未分类</span><span class="chev">›</span></button>
     <textarea class="body-input" id="bodyInput" placeholder="从这里开始记录…"></textarea>
+
+    <section class="block-section" id="todoSection" hidden>
+      <div class="section-head"><strong>清单待办</strong><button class="mini-link" id="addTodoBtn">＋ 添加</button></div>
+      <div id="todoList"></div>
+    </section>
+
+    <section class="block-section" id="attachmentSection" hidden>
+      <div class="section-head"><strong>附件</strong><span class="section-sub" id="attachmentCount"></span></div>
+      <div class="attachments" id="attachmentList"></div>
+    </section>
   </div>
-  <div class="editor-footer"><button class="footer-pill" id="wordCount">0 字</button><button class="footer-pill danger" id="deleteBtn">删除笔记</button></div>
+  <div class="editor-tools">
+    <button class="tool-btn" id="todoTool">☑<span>清单</span></button>
+    <button class="tool-btn" id="imageTool">▧<span>图片</span></button>
+    <button class="tool-btn" id="fileTool">⌕<span>文件</span></button>
+  </div>
+  <div class="editor-footer"><button class="footer-pill" id="wordCount">0 字</button><button class="footer-pill danger" id="deleteBtn">移到回收站</button></div>
 </div>
 
-<div class="overlay" id="menuOverlay"><div class="sheet"><div class="handle"></div><div class="sheet-title">数据与安全</div>
-  <button class="menu-item" id="exportBtn"><div class="menu-icon">⇩</div><div class="menu-text"><div class="menu-main">导出备份</div><div class="menu-sub">保存为 JSON 文件，便于换机或防止误删</div></div><span>›</span></button>
-  <button class="menu-item" id="importBtn"><div class="menu-icon">⇧</div><div class="menu-text"><div class="menu-main">恢复备份</div><div class="menu-sub">从之前导出的 JSON 文件恢复</div></div><span>›</span></button>
-  <div class="menu-item"><div class="menu-icon">⌁</div><div class="menu-text"><div class="menu-main">纯本地模式</div><div class="menu-sub">应用未申请 INTERNET 联网权限</div></div><span>✓</span></div>
+<div class="overlay" id="menuOverlay"><div class="sheet"><div class="handle"></div><div class="sheet-title">设置与数据</div>
+  <button class="menu-item" id="themeBtn"><div class="menu-icon">◐</div><div class="menu-text"><div class="menu-main">深色模式</div><div class="menu-sub" id="themeSub">跟随当前设置</div></div><span id="themeState">关闭</span></button>
+  <button class="menu-item" id="foldersMenuBtn"><div class="menu-icon">▤</div><div class="menu-text"><div class="menu-main">多级文件夹</div><div class="menu-sub">创建、进入或管理层级目录</div></div><span>›</span></button>
+  <button class="menu-item" id="trashBtn"><div class="menu-icon">⌫</div><div class="menu-text"><div class="menu-main">回收站</div><div class="menu-sub" id="trashSub">0 条已删除笔记</div></div><span>›</span></button>
+  <button class="menu-item" id="exportBtn"><div class="menu-icon">⇩</div><div class="menu-text"><div class="menu-main">导出备份</div><div class="menu-sub">笔记、文件夹、清单及附件一起备份</div></div><span>›</span></button>
+  <button class="menu-item" id="importBtn"><div class="menu-icon">⇧</div><div class="menu-text"><div class="menu-main">恢复备份</div><div class="menu-sub">从本机备份文件恢复</div></div><span>›</span></button>
+  <div class="menu-item static"><div class="menu-icon">⌁</div><div class="menu-text"><div class="menu-main">纯本地模式</div><div class="menu-sub">不申请 INTERNET 权限，不联网同步</div></div><span>✓</span></div>
 </div></div>
 
+<div class="overlay" id="folderOverlay"><div class="sheet tall"><div class="handle"></div><div class="sheet-title-row"><div><div class="sheet-title">文件夹</div><div class="sheet-caption">支持多级目录；点文件夹进入，＋创建子文件夹</div></div><button class="round-add" id="addRootFolder">＋</button></div><div class="folder-tree" id="folderTree"></div></div></div>
+<div class="overlay" id="folderPickerOverlay"><div class="sheet tall"><div class="handle"></div><div class="sheet-title-row"><div><div class="sheet-title">移动到文件夹</div><div class="sheet-caption">选择笔记所在目录</div></div><button class="text-btn" id="newFolderFromPicker">新建</button></div><div class="folder-tree" id="folderPickerTree"></div></div></div>
+<div class="overlay" id="trashOverlay"><div class="sheet tall"><div class="handle"></div><div class="sheet-title">回收站</div><div class="sheet-caption">可恢复笔记，也可永久删除</div><div class="trash-list" id="trashList"></div></div></div>
+
 <div class="dialog-mask" id="dialogMask"><div class="dialog"><h3 id="dialogTitle">确认</h3><p id="dialogText"></p><div class="dialog-actions"><button class="dialog-btn" id="dialogCancel">取消</button><button class="dialog-btn danger" id="dialogOk">确定</button></div></div></div>
+<div class="dialog-mask" id="inputMask"><div class="dialog"><h3 id="inputTitle">输入</h3><p id="inputHint"></p><input class="dialog-input" id="dialogInput" autocomplete="off" /><div class="dialog-actions"><button class="dialog-btn" id="inputCancel">取消</button><button class="dialog-btn primary" id="inputOk">确定</button></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="app.js"></script>
 </body>
