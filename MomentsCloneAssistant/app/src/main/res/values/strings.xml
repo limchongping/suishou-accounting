@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">朋友圈克隆助手</string>
+    <string name="accessibility_service_desc">读取微信当前页面可见文字、截图，并在朋友圈编辑页辅助填充文案。</string>
+</resources>
