@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">朋友圈助手</string>
+    <string name="accessibility_desc">用于在微信界面中显示悬浮操作栏、读取当前可见文本，并辅助进入朋友圈发布页。所有操作由用户主动触发，最终发表由用户确认。</string>
+</resources>
