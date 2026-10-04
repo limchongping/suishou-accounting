@@ -1,0 +1,47 @@
+name: Build WeChat Order ERP EXE
+
+on:
+  push:
+    branches:
+      - wechat-order-erp-v1
+    paths:
+      - "wechat_order_erp/**"
+      - ".github/workflows/build-wechat-order-erp.yml"
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r wechat_order_erp/requirements-build.txt
+
+      - name: Build single EXE
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed --name "微信群订单ERP" --collect-all wxauto4 --collect-all fastapi --collect-all uvicorn wechat_order_erp/wechat_order_erp.py
+
+      - name: Verify EXE
+        shell: pwsh
+        run: |
+          if (!(Test-Path "dist/微信群订单ERP.exe")) { throw "EXE build failed" }
+          Get-Item "dist/微信群订单ERP.exe" | Format-List Name,Length,LastWriteTime
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: WeChatOrderERP-Windows-V1
+          path: dist/微信群订单ERP.exe
+          if-no-files-found: error
+          retention-days: 30
