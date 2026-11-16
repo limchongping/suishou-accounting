@@ -1,6 +1,15 @@
 package com.suishou.accounting;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+import android.util.Base64;
+import java.security.KeyStore;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import android.os.Bundle;
 import android.os.Build;
 import android.net.Uri;
@@ -28,6 +37,10 @@ import android.widget.Toast;
 import org.json.JSONObject;
 
 public class MainActivity extends Activity {
+    private static final String API_KEY_ALIAS = "ai_moments_api_key_v1";
+    private static final String API_KEY_PREFS = "secure_api_credentials";
+    private static final String API_KEY_CIPHER_TEXT = "api_key_cipher_text";
+    private static final String API_KEY_IV = "api_key_iv";
     private WebView w;
     private final ExecutorService networkExecutor = Executors.newCachedThreadPool();
 
@@ -84,10 +97,90 @@ public class MainActivity extends Activity {
                 && uri.getPath().startsWith("/android_asset/");
     }
 
+    private synchronized SecretKey getOrCreateApiKeySecret() throws Exception {
+        KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+        keyStore.load(null);
+        if (keyStore.containsAlias(API_KEY_ALIAS)) {
+            return (SecretKey) keyStore.getKey(API_KEY_ALIAS, null);
+        }
+
+        KeyGenerator generator = KeyGenerator.getInstance(
+                KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+        KeyGenParameterSpec spec = new KeyGenParameterSpec.Builder(
+                API_KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setRandomizedEncryptionRequired(true)
+                .build();
+        generator.init(spec);
+        return generator.generateKey();
+    }
+
+    private synchronized String readEncryptedApiKey() {
+        try {
+            SharedPreferences prefs = getSharedPreferences(API_KEY_PREFS, MODE_PRIVATE);
+            String cipherText = prefs.getString(API_KEY_CIPHER_TEXT, null);
+            String ivText = prefs.getString(API_KEY_IV, null);
+            if (cipherText == null || ivText == null) return "";
+
+            byte[] iv = Base64.decode(ivText, Base64.NO_WRAP);
+            byte[] encrypted = Base64.decode(cipherText, Base64.NO_WRAP);
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, getOrCreateApiKeySecret(),
+                    new GCMParameterSpec(128, iv));
+            byte[] plain = cipher.doFinal(encrypted);
+            return new String(plain, StandardCharsets.UTF_8);
+        } catch (Exception exception) {
+            // If the encrypted value cannot be decrypted (for example after OS key invalidation),
+            // discard the unusable entry instead of repeatedly failing on every app launch.
+            getSharedPreferences(API_KEY_PREFS, MODE_PRIVATE).edit()
+                    .remove(API_KEY_CIPHER_TEXT).remove(API_KEY_IV).commit();
+            return "";
+        }
+    }
+
+    private synchronized boolean writeEncryptedApiKey(String apiKey) {
+        SharedPreferences prefs = getSharedPreferences(API_KEY_PREFS, MODE_PRIVATE);
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            return prefs.edit().remove(API_KEY_CIPHER_TEXT).remove(API_KEY_IV).commit();
+        }
+
+        try {
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE, getOrCreateApiKeySecret());
+            byte[] encrypted = cipher.doFinal(apiKey.getBytes(StandardCharsets.UTF_8));
+            String cipherText = Base64.encodeToString(encrypted, Base64.NO_WRAP);
+            String iv = Base64.encodeToString(cipher.getIV(), Base64.NO_WRAP);
+            return prefs.edit()
+                    .putString(API_KEY_CIPHER_TEXT, cipherText)
+                    .putString(API_KEY_IV, iv)
+                    .commit();
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
     private class NativeApiBridge {
         @JavascriptInterface
         public void request(String requestJson, String callbackId) {
             networkExecutor.execute(() -> performNativeRequest(requestJson, callbackId));
+        }
+
+        // Credentials are encrypted with an AES-GCM key held by Android Keystore.
+        @JavascriptInterface
+        public String getStoredApiKey() {
+            return readEncryptedApiKey();
+        }
+
+        @JavascriptInterface
+        public boolean saveApiKey(String apiKey) {
+            return writeEncryptedApiKey(apiKey);
+        }
+
+        @JavascriptInterface
+        public boolean clearApiKey() {
+            return writeEncryptedApiKey("");
         }
     }
 
