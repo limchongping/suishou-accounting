@@ -1,1 +1,468 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>随手记账</title><style>*{box-sizing:border-box}html,body{margin:0;background:#f5f7f6;color:#17201b;font-family:sans-serif}.app{max-width:680px;margin:auto;padding:18px 16px 100px}.top{display:flex;justify-content:space-between;align-items:center;padding-top:4px}h1{font-size:27px;margin:0}.card{background:#fff;border-radius:22px;padding:18px;margin-top:15px}.hero{background:linear-gradient(145deg,#163e2d,#23855c);color:#fff}.bal{font-size:36px;font-weight:800;margin:8px 0 18px}.row{display:flex;gap:10px}.stat{flex:1;background:#ffffff18;padding:12px;border-radius:15px}.muted{color:#85908a;font-size:13px}.hero .muted{color:#d5e8dd}.btn{border:0;border-radius:14px;padding:12px;background:#e8f4ed;color:#17734b;font-weight:700}.add{position:fixed;right:24px;bottom:88px;width:60px;height:60px;border:0;border-radius:50%;background:#1f8a5b;color:#fff;font-size:34px}.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;height:70px;display:flex;justify-content:space-around;border-top:1px solid #eee}.nav button{border:0;background:none;color:#718079}.page{display:none}.page.on{display:block}.item{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid #eee;cursor:pointer}.item:active{opacity:.65}.ico{width:42px;height:42px;border-radius:14px;background:#edf7f1;display:grid;place-items:center;margin-right:11px}.main{flex:1}.amt{font-weight:800}.income{color:#1f8a5b}.sheet{display:none;position:fixed;inset:0;background:#0006;z-index:9;align-items:flex-end}.panel{background:#fff;width:100%;max-width:680px;margin:auto;border-radius:25px 25px 0 0;padding:18px 16px calc(28px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}.sheethead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.sheethead b{font-size:18px}.close{border:0;background:#f1f4f2;border-radius:50%;width:34px;height:34px;font-size:20px;color:#66736d}.seg{display:flex;background:#f1f4f2;border-radius:13px;padding:4px}.seg button{flex:1;border:0;padding:10px;border-radius:10px}.seg .on{background:#fff;color:#17734b}.money{font-size:42px;font-weight:800;width:100%;border:0;outline:0;padding:18px 0}.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.cat{border:0;border-radius:12px;padding:10px 2px;background:#f4f7f5}.cat.on{background:#dff2e8;color:#17734b}.field{width:100%;padding:12px;border:1px solid #e1e7e4;border-radius:13px;margin-top:10px}.save{width:100%;border:0;border-radius:14px;padding:14px;background:#1f8a5b;color:#fff;font-weight:700;margin-top:12px}.danger{display:none;width:100%;border:0;border-radius:14px;padding:13px;background:#fff0f0;color:#c33;font-weight:700;margin-top:9px}.chart{display:flex;align-items:flex-end;height:140px;gap:8px}.col{flex:1;text-align:center;font-size:10px}.col i{display:block;background:#58a984;border-radius:6px 6px 2px 2px}.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.quick button{border:0;border-radius:13px;background:#f2f7f4;padding:12px 2px}.tools button{width:100%;border:0;background:#fff;text-align:left;padding:15px 0;border-bottom:1px solid #eee}.tip{font-size:12px;color:#85908a;line-height:1.6;margin:10px 0 0}</style></head><body><div class="app"><div class="top"><div><div class="muted" id="date"></div><h1>随手记账 <small>V2.2</small></h1></div><button class="btn">日常账本</button></div><section id="home" class="page on"><div class="card hero"><div class="muted">本月结余</div><div class="bal" id="balance">¥0.00</div><div class="row"><div class="stat"><span class="muted">本月支出</span><b id="out">¥0.00</b></div><div class="stat"><span class="muted">本月收入</span><b id="inc">¥0.00</b></div></div></div><div class="card"><b>快捷记账</b><div class="quick" id="quick"></div></div><div class="card"><b>最近账单</b><div id="recent"></div></div></section><section id="detail" class="page"><div class="card"><h2>账单明细</h2><input class="field" id="search" placeholder="搜索分类、备注或日期" oninput="render()"><p class="tip">点击任意账单即可修改金额、分类、日期和备注。</p><div id="all"></div></div></section><section id="stats" class="page"><div class="card"><h2>本月统计</h2><div class="chart" id="chart"></div><div id="rank"></div></div></section><section id="mine" class="page"><div class="card"><h2>我的</h2><label>月度预算</label><input class="field" id="budget" type="number" placeholder="输入预算"><button class="save" onclick="setBudget()">保存预算</button></div><div class="card tools"><button onclick="exportCSV()">📄 导出账单文件（CSV）</button><p class="tip">导出全部账单为 CSV 文件，可用 Excel、WPS 等打开。</p><button onclick="backup()">复制完整备份</button><button onclick="restore()">恢复备份</button><button onclick="clearAll()" style="color:#c44">清空账单</button></div></section></div><button class="add" onclick="openSheet()">+</button><nav class="nav"><button onclick="go('home')">首页</button><button onclick="go('detail')">明细</button><button onclick="go('stats')">统计</button><button onclick="go('mine')">我的</button></nav><div class="sheet" id="sheet" onclick="if(event.target===this)closeSheet()"><div class="panel"><div class="sheethead"><b id="sheetTitle">新增记录</b><button class="close" onclick="closeSheet()">×</button></div><div class="seg"><button id="eBtn" class="on" onclick="setType('expense')">支出</button><button id="iBtn" onclick="setType('income')">收入</button></div><input class="money" id="money" type="number" step="0.01" inputmode="decimal" placeholder="¥ 0.00"><div class="cats" id="cats"></div><input class="field" id="note" placeholder="备注（可选）"><input class="field" id="when" type="date"><button class="save" id="saveBtn" onclick="save()">保存这笔</button><button class="danger" id="deleteBtn" onclick="deleteEditing()">删除这笔记录</button></div></div><script>const $=x=>document.getElementById(x),key='suishou_v2';let store=JSON.parse(localStorage.getItem(key)||'null')||{bills:[],budget:0,cats:{expense:['餐饮','交通','购物','住房','娱乐','医疗','日用','其他'],income:['工资','奖金','兼职','理财','红包','其他']}};let type='expense',cat='餐饮',editingId=null;const icons={餐饮:'🍜',交通:'🚕',购物:'🛍️',住房:'🏠',娱乐:'🎬',医疗:'💊',日用:'🧻',工资:'💰',奖金:'🎁',兼职:'💼',理财:'📈',红包:'🧧',其他:'◦'};function today(){let d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+da}function yuan(n){return '¥'+Number(n||0).toFixed(2)}function persist(){localStorage.setItem(key,JSON.stringify(store))}$('date').textContent=new Date().toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'});$('when').value=today();function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));$(id).classList.add('on');render()}function setType(t){type=t;$('eBtn').className=type==='expense'?'on':'';$('iBtn').className=type==='income'?'on':'';if(!store.cats[type].includes(cat))cat=store.cats[type][0];renderCats()}function renderCats(){$('cats').innerHTML=store.cats[type].map(x=>`<button class="cat ${x===cat?'on':''}" onclick="cat='${x}';renderCats()">${icons[x]||'◦'}<br>${x}</button>`).join('')}function openSheet(pref){editingId=null;type='expense';cat=pref||store.cats.expense[0];$('money').value='';$('note').value='';$('when').value=today();$('sheetTitle').textContent='新增记录';$('saveBtn').textContent='保存这笔';$('deleteBtn').style.display='none';$('sheet').style.display='flex';setType(type);if(pref){cat=pref;renderCats()}setTimeout(()=>$('money').focus(),100)}function openEdit(id){let b=store.bills.find(x=>x.id===id);if(!b)return;editingId=id;type=b.type;cat=b.cat;$('money').value=b.amount;$('note').value=b.note||'';$('when').value=b.date||today();$('sheetTitle').textContent='修改记录';$('saveBtn').textContent='保存修改';$('deleteBtn').style.display='block';$('sheet').style.display='flex';setType(type)}function closeSheet(){$('sheet').style.display='none';editingId=null}function save(){let a=+$('money').value;if(!(a>0))return alert('请输入正确金额');let record={type,cat,amount:a,note:$('note').value.trim(),date:$('when').value||today()};if(editingId!==null){let i=store.bills.findIndex(x=>x.id===editingId);if(i<0)return alert('记录不存在');store.bills[i]={...store.bills[i],...record};}else{store.bills.unshift({id:Date.now(),...record});}persist();closeSheet();render()}function deleteEditing(){if(editingId===null)return;if(confirm('确定删除这笔记录？')){store.bills=store.bills.filter(x=>x.id!==editingId);persist();closeSheet();render()}}function item(b){return `<div class="item" onclick="openEdit(${b.id})"><div class="ico">${icons[b.cat]||'◦'}</div><div class="main"><b>${b.cat}</b><div class="muted">${b.date}${b.note?' · '+b.note:''}</div></div><div class="amt ${b.type}">${b.type==='income'?'+':'-'}${yuan(b.amount)}</div></div>`}function sum(a,t){return a.filter(x=>x.type===t).reduce((s,x)=>s+x.amount,0)}function render(){let mk=today().slice(0,7),m=store.bills.filter(x=>x.date&&x.date.slice(0,7)===mk),iv=sum(m,'income'),ov=sum(m,'expense');$('balance').textContent=yuan(iv-ov);$('out').textContent=yuan(ov);$('inc').textContent=yuan(iv);$('quick').innerHTML=store.cats.expense.slice(0,8).map(x=>`<button onclick="openSheet('${x}')">${icons[x]||'◦'}<br>${x}</button>`).join('');$('recent').innerHTML=store.bills.slice(0,6).map(item).join('')||'<p class="muted">还没有账单，点 + 记一笔</p>';let q=($('search')?.value||'').toLowerCase();$('all').innerHTML=store.bills.filter(x=>(String(x.cat||'')+String(x.note||'')+String(x.date||'')).toLowerCase().includes(q)).map(item).join('')||'<p class="muted">没有账单</p>';$('budget').value=store.budget||'';let buckets=[];for(let i=1;i<=6;i++){let s=(i-1)*5+1,e=i===6?31:i*5,v=m.filter(x=>x.type==='expense'&&+x.date.slice(8,10)>=s&&+x.date.slice(8,10)<=e).reduce((z,x)=>z+x.amount,0);buckets.push([s+'-'+e,v])}let mx=Math.max(1,...buckets.map(x=>x[1]));$('chart').innerHTML=buckets.map(x=>`<div class="col"><i style="height:${Math.max(3,x[1]/mx*110)}px"></i>${x[0]}</div>`).join('');let g={};m.filter(x=>x.type==='expense').forEach(x=>g[x.cat]=(g[x.cat]||0)+x.amount);$('rank').innerHTML=Object.entries(g).sort((a,b)=>b[1]-a[1]).map(x=>`<div class="item"><div class="ico">${icons[x[0]]||'◦'}</div><div class="main"><b>${x[0]}</b></div><b>${yuan(x[1])}</b></div>`).join('')}function setBudget(){store.budget=+$('budget').value||0;persist();alert('预算已保存')}function exportCSV(){let esc=v=>'"'+String(v??'').replaceAll('"','""')+'"';let s='日期,类型,分类,金额,备注\n'+store.bills.map(x=>[x.date,x.type==='expense'?'支出':'收入',x.cat,Number(x.amount).toFixed(2),esc(x.note)].join(',')).join('\n');if(window.Android&&Android.exportCsv){Android.exportCsv('\ufeff'+s)}else if(window.Android){Android.shareCsv('\ufeff'+s)}else{alert('请在安卓应用中使用文件导出功能')}}function backup(){prompt('复制下面的备份文本',JSON.stringify(store))}function restore(){let s=prompt('粘贴备份文本');if(!s)return;try{store=JSON.parse(s);persist();render();alert('恢复完成')}catch(e){alert('备份无效')}}function clearAll(){if(confirm('确定清空全部账单？')){store.bills=[];persist();render()}}render();</script></body></html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f5f7fc">
+<title>AI朋友圈文案改写工具</title>
+<style>
+:root{--bg:#f5f7fc;--card:#fff;--ink:#20283a;--muted:#8490a3;--line:#e8ecf3;--blue:#586be8;--blue2:#4559d5;--soft:#eef1ff;--green:#15966b;--red:#c94d5b;--shadow:0 14px 42px rgba(38,53,92,.07)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 5% 0%,#e9edff 0,transparent 28rem),radial-gradient(circle at 95% 10%,#e8f8f3 0,transparent 25rem),var(--bg);color:var(--ink);font-family:Inter,"Microsoft YaHei","PingFang SC",Arial,sans-serif;min-height:100vh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.shell{max-width:1320px;margin:auto;padding:0 26px 30px}
+header{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(220,226,238,.75);margin-bottom:34px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(145deg,#8292ff,#4d5fd8);display:grid;place-items:center;color:#fff;font-size:20px;font-weight:800;box-shadow:0 8px 18px #6677e633}
+.brand b{font-size:16px}.brand small{display:block;color:#9aa4b4;font-size:11px;margin-top:4px}
+.head-right{display:flex;gap:12px;align-items:center}
+.pill{font-size:11px;border-radius:30px;padding:6px 10px;background:#fff;border:1px solid var(--line);color:#788398}
+.status{font-size:11px;color:var(--muted);display:flex;gap:7px;align-items:center}
+.dot{width:7px;height:7px;background:#e2a13a;border-radius:50%}.status.ok .dot{background:var(--green)}.status.err .dot{background:var(--red)}
+.hero{text-align:center;margin-bottom:30px}
+.kicker{font-size:10px;letter-spacing:2.2px;font-weight:800;color:var(--blue)}
+h1{font-size:clamp(27px,3.2vw,38px);letter-spacing:-1px;margin:10px 0 9px}
+h1 span{color:var(--blue)}
+.hero p{font-size:13px;color:#8b96a8;margin:0;line-height:1.7}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:stretch}
+.panel{background:var(--card);border:1px solid #e9edf4;border-radius:18px;padding:23px;box-shadow:var(--shadow);min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}
+.panel-title{font-size:16px;font-weight:800}.sub{font-size:11px;color:#9aa4b3;margin-top:4px}
+.linkbtn{border:0;background:transparent;color:#8d98aa;font-size:12px;padding:6px}.linkbtn:hover{color:var(--blue)}
+textarea{width:100%;min-height:150px;resize:vertical;padding:14px;border:1px solid var(--line);border-radius:11px;background:#fbfcff;color:var(--ink);font-size:13px;line-height:1.85;outline:none}
+textarea:focus,input:focus,select:focus{border-color:#aab5ff;box-shadow:0 0 0 3px #586be812}
+textarea::placeholder,input::placeholder{color:#b4bdca}
+.counter{display:flex;justify-content:space-between;color:#a3acba;font-size:10px;margin-top:7px}
+.section-title{font-size:13px;font-weight:800;margin:22px 0 12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.field label{font-size:11px;font-weight:700;color:#687489}
+.field select,.field input{height:40px;border:1px solid var(--line);border-radius:9px;background:#fff;color:#3f4a60;padding:0 11px;outline:none;font-size:12px;width:100%}
+.checks{display:grid;gap:11px;margin:17px 0}
+.check{display:flex;gap:9px;align-items:flex-start;cursor:pointer}
+.check input{accent-color:var(--blue);margin:3px 0 0;width:14px;height:14px}
+.check strong{font-size:11px;color:#4d596d;display:block}
+.check small{font-size:10px;color:#a0a9b7;display:block;margin-top:3px;line-height:1.4}
+.custom{margin-top:2px}
+.generate{width:100%;height:49px;border:0;border-radius:11px;color:white;font-weight:800;font-size:13px;letter-spacing:.2px;background:linear-gradient(100deg,#7182f5,#4d5fd8);box-shadow:0 8px 19px #586be83b;margin-top:19px;transition:.15s}
+.generate:hover{transform:translateY(-1px);box-shadow:0 11px 22px #586be84a}
+.generate:disabled{opacity:.65;cursor:wait;transform:none}
+.tiny-note{text-align:center;color:#a6afbd;font-size:10px;line-height:1.6;margin-top:11px}
+.output{min-height:700px;display:flex;flex-direction:column}
+.outhead{margin-bottom:12px}
+.out-actions{display:flex;gap:7px;align-items:center}
+.outline{border:1px solid #e4e8f0;background:white;color:#68758b;border-radius:8px;padding:7px 10px;font-size:11px}
+.outline:disabled{opacity:.4;cursor:not-allowed}
+.outline:hover:not(:disabled){border-color:#bbc4ff;color:var(--blue)}
+.empty,.loading{flex:1;min-height:480px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center}
+.empty-icon{width:100px;height:100px;border-radius:28px;background:linear-gradient(145deg,#f0f2ff,#f8f9ff);display:grid;place-items:center;font-size:42px;color:#8090f1;margin-bottom:19px}
+.empty b,.loading b{font-size:13px;color:#68748a}
+.empty p,.loading p{font-size:11px;color:#a2acba;line-height:1.8;margin:8px 0 0}
+.hidden{display:none!important}
+.spinner{width:32px;height:32px;border:3px solid #e8ebff;border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:17px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error{background:#fff7f7;border:1px solid #f1d5d9;border-radius:10px;color:#b84b58;font-size:12px;line-height:1.7;padding:12px;margin:12px 0;white-space:pre-wrap}
+.results{display:flex;flex-direction:column;gap:12px}
+.result{border:1px solid #e9edf4;border-radius:12px;padding:14px;background:#fff}
+.result-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.result-label{font:800 10px Inter,sans-serif;letter-spacing:.8px;color:#8b96a8}
+.result-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.9;color:#39455a}
+.result-meta{font-size:10px;color:#aab2bf;text-align:right;margin-top:8px}
+.foot{margin-top:auto;padding-top:15px;display:flex;justify-content:space-between;gap:10px;color:#a2abba;font-size:10px}
+footer{text-align:center;color:#b1bac7;font-size:10px;padding:22px 0 0}
+.config{margin-top:17px;padding:13px;border:1px solid #e9edf4;border-radius:11px;background:#fbfcff}
+.config-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.config-head b{font-size:12px}
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.config .field input{height:37px}
+.config-note{font-size:10px;color:#9ba5b4;line-height:1.6;margin-top:9px}
+.config-note strong{color:#7b879a}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.output{min-height:550px}.empty,.loading{min-height:350px}}
+@media(max-width:520px){.shell{padding:0 12px 22px}header{height:66px;margin-bottom:25px}.panel{padding:17px;border-radius:14px}.brand b{font-size:14px}.brand small{display:none}.head-right{gap:7px}.status{font-size:10px}.grid,.config-grid{gap:9px}.hero p{max-width:320px;margin:auto}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header>
+  <div class="brand"><div class="logo">文</div><div><b>朋友圈文案改写器</b><small>让每一条分享，都更自然一点</small></div></div>
+  <div class="head-right"><span class="pill">Android APP V1.0</span><div class="status" id="status"><i class="dot"></i><span id="statusText">等待 API 配置</span></div></div>
+</header>
+
+<section class="hero">
+  <div class="kicker">AI COPYWRITER · MOMENTS</div>
+  <h1>把原文变成<span>更好的朋友圈</span></h1>
+  <p>粘贴原文，选择表达风格，一键生成多条自然、不生硬的新文案。</p>
+</section>
+
+<section class="layout">
+  <div class="panel">
+    <div class="panel-head"><div><div class="panel-title">原始文案</div><div class="sub">粘贴你想改写的内容</div></div><button class="linkbtn" id="clearBtn">清空</button></div>
+    <textarea id="source" maxlength="10000" placeholder="例如：今天给大家分享一款很好吃的潮汕牛肉丸，煮火锅、煮汤都很合适，喜欢的朋友可以找我了解……"></textarea>
+    <div class="counter"><span>支持最多 10,000 字</span><span id="countText">0 / 10000</span></div>
+
+    <div class="section-title">改写设置</div>
+    <div class="grid">
+      <div class="field"><label for="scene">文案场景</label><select id="scene">
+        <option value="通用朋友圈">通用朋友圈</option><option value="产品或商品分享" selected>产品 / 商品分享</option><option value="日常生活分享">日常生活分享</option><option value="活动或营销推广">活动 / 营销推广</option><option value="客户反馈或使用体验">客户反馈 / 使用体验</option><option value="节日祝福">节日祝福</option>
+      </select></div>
+      <div class="field"><label for="tone">表达风格</label><select id="tone">
+        <option value="自然口语化，像真人日常发朋友圈，不要有明显AI腔" selected>自然口语化</option><option value="真诚朴实，不夸张、不油腻，表达可信">真诚朴实</option><option value="温暖亲切，有生活气息，语气友好">温暖亲切</option><option value="轻松幽默，有趣但不过度玩梗">轻松幽默</option><option value="专业可信，重点清晰，表达有条理">专业可信</option><option value="简洁有力，删掉冗余表达">简洁有力</option>
+      </select></div>
+      <div class="field"><label for="length">文案长度</label><select id="length">
+        <option value="与原文大致相近" selected>与原文相近</option><option value="约50至80个汉字">短文案（50–80字）</option><option value="约80至150个汉字">中等（80–150字）</option><option value="约150至250个汉字">长文案（150–250字）</option>
+      </select></div>
+      <div class="field"><label for="num">生成数量</label><select id="num"><option>1</option><option>2</option><option selected>3</option><option>5</option></select></div>
+    </div>
+
+    <div class="checks">
+      <label class="check"><input id="facts" type="checkbox" checked><span><strong>保留原文事实</strong><small>产品名称、规格、价格、时间、活动条件不擅自修改</small></span></label>
+      <label class="check"><input id="antiFold" type="checkbox" checked><span><strong>朋友圈简短自然</strong><small>减少冗余和过多分段，尽量降低被折叠的概率</small></span></label>
+      <label class="check"><input id="noPrice" type="checkbox"><span><strong>不出现价格金额</strong><small>自动去掉报价和金额信息</small></span></label>
+    </div>
+    <div class="field custom"><label for="custom">额外要求（选填）</label><input id="custom" type="text" placeholder="例如：不要太像广告、不要表情符号、结尾加一句互动引导"></div>
+
+    <div class="config">
+      <div class="config-head"><b>大模型 API 配置</b><button class="linkbtn" id="testBtn" type="button">测试连接</button></div>
+      <div class="config-grid">
+        <div class="field"><label for="provider">接口预设</label><select id="provider">
+          <option value="custom">自定义兼容接口</option><option value="deepseek" selected>DeepSeek</option><option value="openai">OpenAI</option><option value="qwen">阿里云百炼（兼容模式）</option><option value="silicon">硅基流动</option>
+        </select></div>
+        <div class="field"><label for="model">模型名称</label><input id="model" value="deepseek-chat" placeholder="例如 deepseek-chat"></div>
+        <div class="field" style="grid-column:1/-1"><label for="baseUrl">API Base URL</label><input id="baseUrl" value="https://api.deepseek.com" placeholder="https://api.example.com/v1"></div>
+        <div class="field" style="grid-column:1/-1"><label for="apiKey">API Key</label><input id="apiKey" type="password" autocomplete="off" placeholder="粘贴你的 API Key（不会保存在本文件中）"></div>
+      </div>
+      <div class="config-note"><strong>隐私提示：</strong>API Key 仅保存在当前页面内存中，不写入文件或浏览器存储。安卓 APP 通过系统 HTTPS 网络组件请求模型服务，不受 WebView 浏览器跨域限制；电脑浏览器打开此页面时仍可能受服务商 CORS 限制。请勿在公共设备上填写 API Key。</div>
+    </div>
+
+    <button class="generate" id="generateBtn">✦　AI 一键生成文案　→</button>
+    <div class="tiny-note">安卓原生网络请求 · 手机安装即用 · 无需 Node.js</div>
+  </div>
+
+  <div class="panel output">
+    <div class="panel-head outhead"><div><div class="panel-title">改写结果</div><div class="sub" id="resultDesc">生成的文案会显示在这里</div></div><div class="out-actions"><button class="outline" id="copyAll" disabled>复制全部</button></div></div>
+    <div class="empty" id="empty"><div class="empty-icon">✎</div><b>等待你的第一段文案</b><p>填写左侧原文并配置 API<br>点击生成，即可获得不同表达版本</p></div>
+    <div class="loading hidden" id="loading"><div class="spinner"></div><b>AI 正在认真改写</b><p>正在生成不同表达版本，请稍候…</p></div>
+    <div class="error hidden" id="error"></div>
+    <div class="results" id="results"></div>
+    <div class="foot"><span>发布前请核对产品信息、价格及事实细节。</span><span id="modelLabel"></span></div>
+  </div>
+</section>
+<footer>AI朋友圈文案改写工具 · Android APP版</footer>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let latest = [];
+  let busy = false;
+
+  const presets = {
+    deepseek: {url:"https://api.deepseek.com", model:"deepseek-chat"},
+    openai: {url:"https://api.openai.com/v1", model:"gpt-4o-mini"},
+    qwen: {url:"https://dashscope.aliyuncs.com/compatible-mode/v1", model:"qwen-plus"},
+    silicon: {url:"https://api.siliconflow.cn/v1", model:"Qwen/Qwen2.5-7B-Instruct"},
+    custom: {url:"", model:""}
+  };
+
+  function setStatus(kind, message) {
+    $("status").className = "status " + (kind || "");
+    $("statusText").textContent = message;
+  }
+  function showError(message) {
+    $("error").textContent = message;
+    $("error").classList.remove("hidden");
+  }
+  function clearError() {
+    $("error").textContent = "";
+    $("error").classList.add("hidden");
+  }
+  function setBusy(value) {
+    busy = value;
+    $("generateBtn").disabled = value;
+    $("generateBtn").textContent = value ? "正在生成，请稍候…" : "✦　AI 一键生成文案　→";
+    $("loading").classList.toggle("hidden", !value);
+    if (value) {
+      $("empty").classList.add("hidden");
+      $("results").innerHTML = "";
+      clearError();
+    }
+  }
+  function endpointFromBase(base) {
+    let value = base.trim().replace(/\/+$/, "");
+    if (!value) throw new Error("请填写 API Base URL。");
+    if (/\/chat\/completions$/i.test(value)) return value;
+    if (/\/v\d+$/i.test(value)) return value + "/chat/completions";
+    return value + "/v1/chat/completions";
+  }
+  function promptFor(data) {
+    const rules = [
+      "你是一名专业的中文微信朋友圈文案编辑，擅长将用户提供的文案改写成自然、真实、有温度的表达。",
+      "文案场景：" + data.scene + "。",
+      "表达风格：" + data.tone + "。",
+      "篇幅要求：" + data.length + "。",
+      data.facts ? "保留原文所有重要事实，包括产品名称、规格、价格、时间、地点、数量、活动条件；不得擅自改动或编造。" : "保留原文核心意思，不要编造具体事实。",
+      data.antiFold ? "适合微信朋友圈阅读，开头自然，减少冗余和过多分段，尽量简短自然。不能承诺平台一定不折叠。" : "",
+      data.noPrice ? "不得出现价格、金额、报价或具体数字金额。删除原文价格信息，但尽量保留其他事实。" : "",
+      data.custom ? "用户额外要求：" + data.custom : "",
+      "请生成 " + data.num + " 条彼此明显不同的版本，不要只替换同义词。",
+      "严格只返回 JSON 数组，格式为 [\"第一条文案\",\"第二条文案\"]。不要使用 Markdown 代码块，不要附加解释、编号或其他文字。"
+    ].filter(Boolean);
+    return rules.join("\n") + "\n\n【原始朋友圈文案】\n" + data.text;
+  }
+  function extractOutputs(content, expected) {
+    let raw = typeof content === "string" ? content : "";
+    if (Array.isArray(content)) raw = content.map(x => x.text || "").join("\n");
+    raw = raw.trim().replace(/^\x60{3}(?:json)?\s*/i, "").replace(/\s*\x60{3}$/i, "");
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.map(x => String(x).trim()).filter(Boolean).slice(0, expected);
+      if (parsed && Array.isArray(parsed.outputs)) return parsed.outputs.map(x => String(x).trim()).filter(Boolean).slice(0, expected);
+    } catch (_) {}
+    const first = raw.indexOf("[");
+    const last = raw.lastIndexOf("]");
+    if (first >= 0 && last > first) {
+      try {
+        const parsed = JSON.parse(raw.slice(first, last + 1));
+        if (Array.isArray(parsed)) return parsed.map(x => String(x).trim()).filter(Boolean).slice(0, expected);
+      } catch (_) {}
+    }
+    const split = raw.split(/(?:^|\n)\s*(?:版本\s*)?[1-5][、.．:：)）]\s*/).map(x => x.trim()).filter(Boolean);
+    return split.length > 1 ? split.slice(0, expected) : (raw ? [raw] : []);
+  }
+
+  // Android APK uses a native HTTPS bridge to avoid WebView/browser CORS restrictions.
+  // In a normal desktop browser, the standard Fetch API remains the fallback.
+  let nativeRequestSequence = 0;
+  window.__nativeFetchPending = {};
+  window.__nativeFetchResult = function(id, status, body) {
+    const pending = window.__nativeFetchPending[id];
+    if (!pending) return;
+    delete window.__nativeFetchPending[id];
+    pending.resolve({
+      ok: status >= 200 && status < 300,
+      status,
+      text: async () => body
+    });
+  };
+  function apiFetch(url, options) {
+    if (window.AndroidApi && typeof window.AndroidApi.request === "function") {
+      return new Promise((resolve) => {
+        const id = "req_" + (++nativeRequestSequence) + "_" + Date.now();
+        const timer = setTimeout(() => {
+          delete window.__nativeFetchPending[id];
+          resolve({
+            ok: false,
+            status: 0,
+            text: async () => JSON.stringify({error:{message:"请求超时，请检查手机网络或 API 服务状态。"}})
+          });
+        }, 120000);
+        window.__nativeFetchPending[id] = {
+          resolve: (result) => { clearTimeout(timer); resolve(result); }
+        };
+        try {
+          window.AndroidApi.request(JSON.stringify({url, options}), id);
+        } catch (e) {
+          clearTimeout(timer);
+          delete window.__nativeFetchPending[id];
+          resolve({
+            ok: false,
+            status: 0,
+            text: async () => JSON.stringify({error:{message:e.message || "安卓网络请求失败"}})
+          });
+        }
+      });
+    }
+    return fetch(url, options);
+  }
+
+  async function callModel(data) {
+    const key = $("apiKey").value.trim();
+    if (!key) throw new Error("请先填写 API Key。");
+    const url = endpointFromBase($("baseUrl").value);
+    const model = $("model").value.trim();
+    if (!model) throw new Error("请填写模型名称。");
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 90000);
+    try {
+      const response = await apiFetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + key
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            {role:"system", content:"你是严谨的中文朋友圈文案编辑。严格遵守用户要求，不得编造事实。输出必须符合用户指定格式。"},
+            {role:"user", content:promptFor(data)}
+          ],
+          temperature: 0.85,
+          max_tokens: 2200
+        }),
+        signal: controller.signal
+      });
+      const text = await response.text();
+      let json;
+      try { json = JSON.parse(text); }
+      catch (_) { throw new Error("接口返回内容无法解析（HTTP " + response.status + "）。请检查 API 地址或服务商兼容性。"); }
+      if (!response.ok) {
+        const msg = json && json.error && (json.error.message || json.error) || json.message || ("HTTP " + response.status);
+        throw new Error("模型接口请求失败：" + (typeof msg === "string" ? msg : JSON.stringify(msg)));
+      }
+      const content = json && json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content;
+      const outputs = extractOutputs(content, data.num);
+      if (!outputs.length) throw new Error("模型没有返回可用文案，请检查模型名称或重试。");
+      return outputs;
+    } catch (e) {
+      if (e.name === "AbortError") throw new Error("请求超时，请检查网络后重试。");
+      if (e instanceof TypeError) throw new Error("浏览器无法连接该 API。常见原因是服务商未开放浏览器跨域访问（CORS）、网络限制或 API 地址错误。请尝试服务商支持的兼容接口；若仍不支持跨域，则需要后端代理，单个 HTML 无法绕过浏览器安全限制。");
+      throw e;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  async function copyText(text, button) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (_) {
+      const t = document.createElement("textarea");
+      t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
+      document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove();
+    }
+    if (button) {
+      const old = button.textContent;
+      button.textContent = "已复制 ✓";
+      setTimeout(() => button.textContent = old, 1300);
+    }
+  }
+  function render(outputs) {
+    latest = outputs;
+    $("results").innerHTML = "";
+    $("empty").classList.add("hidden");
+    $("loading").classList.add("hidden");
+    $("error").classList.add("hidden");
+    $("copyAll").disabled = !outputs.length;
+    $("resultDesc").textContent = "已生成 " + outputs.length + " 条不同版本，选择喜欢的文案复制";
+    outputs.forEach((text, i) => {
+      const card = document.createElement("article");
+      card.className = "result";
+      const top = document.createElement("div");
+      top.className = "result-top";
+      const label = document.createElement("span");
+      label.className = "result-label";
+      label.textContent = "VERSION 0" + (i + 1);
+      const btn = document.createElement("button");
+      btn.className = "outline";
+      btn.textContent = "复制文案";
+      btn.addEventListener("click", () => copyText(text, btn));
+      top.append(label, btn);
+      const body = document.createElement("div");
+      body.className = "result-text";
+      body.textContent = text;
+      const meta = document.createElement("div");
+      meta.className = "result-meta";
+      meta.textContent = text.length + " 字";
+      card.append(top, body, meta);
+      $("results").appendChild(card);
+    });
+  }
+
+  $("source").addEventListener("input", () => {
+    $("countText").textContent = $("source").value.length + " / 10000";
+  });
+  $("provider").addEventListener("change", () => {
+    const p = presets[$("provider").value];
+    if (!p) return;
+    $("baseUrl").value = p.url;
+    $("model").value = p.model;
+  });
+  $("generateBtn").addEventListener("click", async () => {
+    if (busy) return;
+    const text = $("source").value.trim();
+    if (!text) { $("source").focus(); showError("请先输入需要改写的朋友圈原文。"); return; }
+    const data = {
+      text,
+      scene: $("scene").value,
+      tone: $("tone").value,
+      length: $("length").value,
+      num: Number($("num").value),
+      facts: $("facts").checked,
+      antiFold: $("antiFold").checked,
+      noPrice: $("noPrice").checked,
+      custom: $("custom").value.trim()
+    };
+    latest = [];
+    $("copyAll").disabled = true;
+    setBusy(true);
+    try {
+      const outputs = await callModel(data);
+      render(outputs);
+      $("modelLabel").textContent = "模型：" + $("model").value.trim();
+      setStatus("ok", "接口请求成功");
+    } catch (e) {
+      $("loading").classList.add("hidden");
+      $("empty").classList.add("hidden");
+      showError(e.message || "生成失败，请检查 API 配置。");
+      $("resultDesc").textContent = "本次生成未完成";
+      setStatus("err", "请求失败");
+    } finally {
+      busy = false;
+      $("generateBtn").disabled = false;
+      $("generateBtn").textContent = "✦　AI 一键生成文案　→";
+    }
+  });
+  $("testBtn").addEventListener("click", async () => {
+    if (busy) return;
+    const key = $("apiKey").value.trim();
+    if (!key) { showError("请先填写 API Key，再测试连接。"); return; }
+    const model = $("model").value.trim();
+    if (!model) { showError("请填写模型名称。"); return; }
+    $("testBtn").disabled = true;
+    $("testBtn").textContent = "测试中…";
+    clearError();
+    try {
+      const url = endpointFromBase($("baseUrl").value);
+      const response = await apiFetch(url, {
+        method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
+        body:JSON.stringify({model,messages:[{role:"user",content:"请只回复：连接成功"}],max_tokens:20,temperature:0})
+      });
+      const body = await response.text();
+      let json;
+      try { json = JSON.parse(body); } catch (_) { throw new Error("响应无法解析，HTTP " + response.status); }
+      if (!response.ok) {
+        const msg = json && json.error && (json.error.message || json.error) || json && json.message || ("HTTP " + response.status);
+        throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+      }
+      setStatus("ok","接口连接成功");
+      $("modelLabel").textContent = "模型：" + model;
+      alert("API 连接成功！");
+    } catch(e) {
+      setStatus("err","连接失败");
+      showError(e instanceof TypeError ? "浏览器无法连接 API，可能是跨域（CORS）限制。单文件网页不能绕过此限制。" : (e.message || "连接失败"));
+    } finally {
+      $("testBtn").disabled = false;
+      $("testBtn").textContent = "测试连接";
+    }
+  });
+  $("copyAll").addEventListener("click", () => {
+    if (latest.length) copyText(latest.map((x,i)=>"版本 "+(i+1)+"\n"+x).join("\n\n--------------------\n\n"), $("copyAll"));
+  });
+  $("clearBtn").addEventListener("click", () => {
+    $("source").value = "";
+    $("countText").textContent = "0 / 10000";
+    $("results").innerHTML = "";
+    $("error").classList.add("hidden");
+    $("loading").classList.add("hidden");
+    $("empty").classList.remove("hidden");
+    $("copyAll").disabled = true;
+    $("resultDesc").textContent = "生成的文案会显示在这里";
+    $("modelLabel").textContent = "";
+    latest = [];
+    $("source").focus();
+  });
+})();
+</script>
+</body>
+</html>
