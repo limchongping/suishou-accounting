@@ -74,6 +74,7 @@ footer{text-align:center;color:#b1bac7;font-size:10px;padding:22px 0 0}
 .config{margin-top:17px;padding:13px;border:1px solid #e9edf4;border-radius:11px;background:#fbfcff}
 .config-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .config-head b{font-size:12px}
+.config-actions{display:flex;align-items:center;gap:8px}
 .config-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .config .field input{height:37px}
 .config-note{font-size:10px;color:#9ba5b4;line-height:1.6;margin-top:9px}
@@ -123,16 +124,16 @@ footer{text-align:center;color:#b1bac7;font-size:10px;padding:22px 0 0}
     <div class="field custom"><label for="custom">额外要求（选填）</label><input id="custom" type="text" placeholder="例如：不要太像广告、不要表情符号、结尾加一句互动引导"></div>
 
     <div class="config">
-      <div class="config-head"><b>大模型 API 配置</b><button class="linkbtn" id="testBtn" type="button">测试连接</button></div>
+      <div class="config-head"><b>大模型 API 配置</b><div class="config-actions"><button class="linkbtn" id="clearKeyBtn" type="button">清除密钥</button><button class="linkbtn" id="testBtn" type="button">测试连接</button></div></div>
       <div class="config-grid">
         <div class="field"><label for="provider">接口预设</label><select id="provider">
           <option value="custom">自定义兼容接口</option><option value="deepseek" selected>DeepSeek</option><option value="openai">OpenAI</option><option value="qwen">阿里云百炼（兼容模式）</option><option value="silicon">硅基流动</option>
         </select></div>
         <div class="field"><label for="model">模型名称</label><input id="model" value="deepseek-chat" placeholder="例如 deepseek-chat"></div>
         <div class="field" style="grid-column:1/-1"><label for="baseUrl">API Base URL</label><input id="baseUrl" value="https://api.deepseek.com" placeholder="https://api.example.com/v1"></div>
-        <div class="field" style="grid-column:1/-1"><label for="apiKey">API Key</label><input id="apiKey" type="password" autocomplete="off" placeholder="粘贴你的 API Key（不会保存在本文件中）"></div>
+        <div class="field" style="grid-column:1/-1"><label for="apiKey">API Key</label><input id="apiKey" type="password" autocomplete="off" placeholder="粘贴你的 API Key（安卓端会加密保存在本机）"></div>
       </div>
-      <div class="config-note"><strong>隐私提示：</strong>API Key 仅保存在当前页面内存中，不写入文件或浏览器存储。安卓 APP 通过系统 HTTPS 网络组件请求模型服务，不受 WebView 浏览器跨域限制；电脑浏览器打开此页面时仍可能受服务商 CORS 限制。请勿在公共设备上填写 API Key。</div>
+      <div class="config-note"><strong>隐私提示：</strong>安卓 APP 会使用 Android Keystore 对 API Key 加密并保存在本机，重新打开应用后自动填入；密钥不会以明文写入配置文件。电脑浏览器版仅保存在当前页面内存。API 请求通过 HTTPS 发送至你选择的模型服务商，请勿在公共设备上填写密钥。</div>
     </div>
 
     <button class="generate" id="generateBtn">✦　AI 一键生成文案　→</button>
@@ -279,6 +280,7 @@ footer{text-align:center;color:#b1bac7;font-size:10px;padding:22px 0 0}
   async function callModel(data) {
     const key = $("apiKey").value.trim();
     if (!key) throw new Error("请先填写 API Key。");
+    if (!persistApiKey()) throw new Error("API Key 未能安全保存到本机，请重新输入或重启应用后再试。");
     const url = endpointFromBase($("baseUrl").value);
     const model = $("model").value.trim();
     if (!model) throw new Error("请填写模型名称。");
@@ -416,6 +418,7 @@ footer{text-align:center;color:#b1bac7;font-size:10px;padding:22px 0 0}
     if (busy) return;
     const key = $("apiKey").value.trim();
     if (!key) { showError("请先填写 API Key，再测试连接。"); return; }
+    if (!persistApiKey()) { showError("API Key 未能安全保存到本机，请检查应用存储权限后重试。"); return; }
     const model = $("model").value.trim();
     if (!model) { showError("请填写模型名称。"); return; }
     $("testBtn").disabled = true;
@@ -449,6 +452,70 @@ footer{text-align:center;color:#b1bac7;font-size:10px;padding:22px 0 0}
   $("copyAll").addEventListener("click", () => {
     if (latest.length) copyText(latest.map((x,i)=>"版本 "+(i+1)+"\n"+x).join("\n\n--------------------\n\n"), $("copyAll"));
   });
+  function persistApiKey() {
+    const bridge = window.AndroidApi;
+    // Desktop browser fallback: do not persist credentials in browser storage.
+    if (!bridge || typeof bridge.saveApiKey !== "function") return true;
+    try {
+      const saved = bridge.saveApiKey($("apiKey").value);
+      if (!saved) {
+        setStatus("err", "API Key 保存失败");
+        return false;
+      }
+      if ($("apiKey").value.trim()) setStatus("ok", "API Key 已加密保存");
+      else setStatus("", "等待 API 配置");
+      return true;
+    } catch (e) {
+      setStatus("err", "API Key 保存失败");
+      return false;
+    }
+  }
+
+  function restoreApiKey() {
+    const bridge = window.AndroidApi;
+    if (!bridge || typeof bridge.getStoredApiKey !== "function") return;
+    try {
+      const savedKey = bridge.getStoredApiKey();
+      if (savedKey) {
+        $("apiKey").value = savedKey;
+        setStatus("ok", "已自动载入安全保存的 API Key");
+      }
+    } catch (e) {
+      setStatus("err", "读取已保存 API Key 失败");
+    }
+  }
+
+  let apiKeySaveTimer = null;
+  $("apiKey").addEventListener("input", () => {
+    if (apiKeySaveTimer) clearTimeout(apiKeySaveTimer);
+    apiKeySaveTimer = setTimeout(() => {
+      persistApiKey();
+      apiKeySaveTimer = null;
+    }, 450);
+  });
+  $("apiKey").addEventListener("change", persistApiKey);
+  $("apiKey").addEventListener("blur", persistApiKey);
+  window.addEventListener("pagehide", persistApiKey);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") persistApiKey();
+  });
+
+  $("clearKeyBtn").addEventListener("click", () => {
+    $("apiKey").value = "";
+    const bridge = window.AndroidApi;
+    if (bridge && typeof bridge.clearApiKey === "function") {
+      const cleared = bridge.clearApiKey();
+      if (!cleared) {
+        showError("清除本机保存的 API Key 失败，请稍后重试。");
+        return;
+      }
+    }
+    setStatus("", "API Key 已清除");
+    clearError();
+  });
+
+  restoreApiKey();
+
   $("clearBtn").addEventListener("click", () => {
     $("source").value = "";
     $("countText").textContent = "0 / 10000";
