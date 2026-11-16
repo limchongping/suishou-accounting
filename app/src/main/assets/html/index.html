@@ -2,533 +2,193 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#f5f7fc">
-<title>AI朋友圈文案改写工具</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5f7ff">
+<title>AI朋友圈改写器</title>
 <style>
-:root{--bg:#f5f7fc;--card:#fff;--ink:#20283a;--muted:#8490a3;--line:#e8ecf3;--blue:#586be8;--blue2:#4559d5;--soft:#eef1ff;--green:#15966b;--red:#c94d5b;--shadow:0 14px 42px rgba(38,53,92,.07)}
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at 5% 0%,#e9edff 0,transparent 28rem),radial-gradient(circle at 95% 10%,#e8f8f3 0,transparent 25rem),var(--bg);color:var(--ink);font-family:Inter,"Microsoft YaHei","PingFang SC",Arial,sans-serif;min-height:100vh}
-button,input,textarea,select{font:inherit}
-button{cursor:pointer}
-.shell{max-width:1320px;margin:auto;padding:0 26px 30px}
-header{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(220,226,238,.75);margin-bottom:34px}
-.brand{display:flex;align-items:center;gap:12px}
-.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(145deg,#8292ff,#4d5fd8);display:grid;place-items:center;color:#fff;font-size:20px;font-weight:800;box-shadow:0 8px 18px #6677e633}
-.brand b{font-size:16px}.brand small{display:block;color:#9aa4b4;font-size:11px;margin-top:4px}
-.head-right{display:flex;gap:12px;align-items:center}
-.pill{font-size:11px;border-radius:30px;padding:6px 10px;background:#fff;border:1px solid var(--line);color:#788398}
-.status{font-size:11px;color:var(--muted);display:flex;gap:7px;align-items:center}
-.dot{width:7px;height:7px;background:#e2a13a;border-radius:50%}.status.ok .dot{background:var(--green)}.status.err .dot{background:var(--red)}
-.hero{text-align:center;margin-bottom:30px}
-.kicker{font-size:10px;letter-spacing:2.2px;font-weight:800;color:var(--blue)}
-h1{font-size:clamp(27px,3.2vw,38px);letter-spacing:-1px;margin:10px 0 9px}
-h1 span{color:var(--blue)}
-.hero p{font-size:13px;color:#8b96a8;margin:0;line-height:1.7}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:stretch}
-.panel{background:var(--card);border:1px solid #e9edf4;border-radius:18px;padding:23px;box-shadow:var(--shadow);min-width:0}
-.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}
-.panel-title{font-size:16px;font-weight:800}.sub{font-size:11px;color:#9aa4b3;margin-top:4px}
-.linkbtn{border:0;background:transparent;color:#8d98aa;font-size:12px;padding:6px}.linkbtn:hover{color:var(--blue)}
-textarea{width:100%;min-height:150px;resize:vertical;padding:14px;border:1px solid var(--line);border-radius:11px;background:#fbfcff;color:var(--ink);font-size:13px;line-height:1.85;outline:none}
-textarea:focus,input:focus,select:focus{border-color:#aab5ff;box-shadow:0 0 0 3px #586be812}
-textarea::placeholder,input::placeholder{color:#b4bdca}
-.counter{display:flex;justify-content:space-between;color:#a3acba;font-size:10px;margin-top:7px}
-.section-title{font-size:13px;font-weight:800;margin:22px 0 12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.field{display:flex;flex-direction:column;gap:7px;min-width:0}
-.field label{font-size:11px;font-weight:700;color:#687489}
-.field select,.field input{height:40px;border:1px solid var(--line);border-radius:9px;background:#fff;color:#3f4a60;padding:0 11px;outline:none;font-size:12px;width:100%}
-.checks{display:grid;gap:11px;margin:17px 0}
-.check{display:flex;gap:9px;align-items:flex-start;cursor:pointer}
-.check input{accent-color:var(--blue);margin:3px 0 0;width:14px;height:14px}
-.check strong{font-size:11px;color:#4d596d;display:block}
-.check small{font-size:10px;color:#a0a9b7;display:block;margin-top:3px;line-height:1.4}
-.custom{margin-top:2px}
-.generate{width:100%;height:49px;border:0;border-radius:11px;color:white;font-weight:800;font-size:13px;letter-spacing:.2px;background:linear-gradient(100deg,#7182f5,#4d5fd8);box-shadow:0 8px 19px #586be83b;margin-top:19px;transition:.15s}
-.generate:hover{transform:translateY(-1px);box-shadow:0 11px 22px #586be84a}
-.generate:disabled{opacity:.65;cursor:wait;transform:none}
-.tiny-note{text-align:center;color:#a6afbd;font-size:10px;line-height:1.6;margin-top:11px}
-.output{min-height:700px;display:flex;flex-direction:column}
-.outhead{margin-bottom:12px}
-.out-actions{display:flex;gap:7px;align-items:center}
-.outline{border:1px solid #e4e8f0;background:white;color:#68758b;border-radius:8px;padding:7px 10px;font-size:11px}
-.outline:disabled{opacity:.4;cursor:not-allowed}
-.outline:hover:not(:disabled){border-color:#bbc4ff;color:var(--blue)}
-.empty,.loading{flex:1;min-height:480px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center}
-.empty-icon{width:100px;height:100px;border-radius:28px;background:linear-gradient(145deg,#f0f2ff,#f8f9ff);display:grid;place-items:center;font-size:42px;color:#8090f1;margin-bottom:19px}
-.empty b,.loading b{font-size:13px;color:#68748a}
-.empty p,.loading p{font-size:11px;color:#a2acba;line-height:1.8;margin:8px 0 0}
-.hidden{display:none!important}
-.spinner{width:32px;height:32px;border:3px solid #e8ebff;border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:17px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.error{background:#fff7f7;border:1px solid #f1d5d9;border-radius:10px;color:#b84b58;font-size:12px;line-height:1.7;padding:12px;margin:12px 0;white-space:pre-wrap}
-.results{display:flex;flex-direction:column;gap:12px}
-.result{border:1px solid #e9edf4;border-radius:12px;padding:14px;background:#fff}
-.result-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
-.result-label{font:800 10px Inter,sans-serif;letter-spacing:.8px;color:#8b96a8}
-.result-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.9;color:#39455a}
-.result-meta{font-size:10px;color:#aab2bf;text-align:right;margin-top:8px}
-.foot{margin-top:auto;padding-top:15px;display:flex;justify-content:space-between;gap:10px;color:#a2abba;font-size:10px}
-footer{text-align:center;color:#b1bac7;font-size:10px;padding:22px 0 0}
-.config{margin-top:17px;padding:13px;border:1px solid #e9edf4;border-radius:11px;background:#fbfcff}
-.config-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.config-head b{font-size:12px}
-.config-actions{display:flex;align-items:center;gap:8px}
-.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.config .field input{height:37px}
-.config-note{font-size:10px;color:#9ba5b4;line-height:1.6;margin-top:9px}
-.config-note strong{color:#7b879a}
-@media(max-width:900px){.layout{grid-template-columns:1fr}.output{min-height:550px}.empty,.loading{min-height:350px}}
-@media(max-width:520px){.shell{padding:0 12px 22px}header{height:66px;margin-bottom:25px}.panel{padding:17px;border-radius:14px}.brand b{font-size:14px}.brand small{display:none}.head-right{gap:7px}.status{font-size:10px}.grid,.config-grid{gap:9px}.hero p{max-width:320px;margin:auto}}
+:root{
+  --bg:#f4f6fc;--surface:#fff;--surface-soft:#f8f9fe;--ink:#20283a;--muted:#8792a6;
+  --line:#e9edf5;--primary:#596fe6;--primary-dark:#4058d2;--primary-soft:#edf0ff;
+  --green:#15966b;--red:#d35d68;--shadow:0 10px 30px rgba(40,55,100,.07);
+  --radius:20px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{min-height:100%;background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:radial-gradient(circle at 4% 4%,#e9edff 0,transparent 26rem),radial-gradient(circle at 98% 12%,#e9f8f4 0,transparent 22rem),var(--bg)}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.app{max-width:760px;margin:0 auto;min-height:100vh;padding:0 16px 132px}
+/* The spacer deliberately reserves room for Android's system status bar. */
+.safe-top{height:max(34px,env(safe-area-inset-top,0px))}
+.topbar{height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(222,228,240,.72);margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.logo{width:43px;height:43px;flex:0 0 43px;border-radius:15px;background:linear-gradient(145deg,#8294ff,#5268df);display:grid;place-items:center;color:#fff;font-size:22px;font-weight:900;box-shadow:0 8px 18px #6378e533}
+.brand-title{font-size:15px;font-weight:850;letter-spacing:.1px}.brand-sub{font-size:10px;color:#9aa4b5;margin-top:3px}
+.top-status{display:flex;align-items:center;gap:7px;padding:8px 11px;background:rgba(255,255,255,.82);border:1px solid #e8ecf5;border-radius:30px;color:#7d899e;font-size:10px;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:#e2a13a;box-shadow:0 0 0 3px #e2a13a18}.dot.ok{background:var(--green);box-shadow:0 0 0 3px #15966b18}.dot.err{background:var(--red);box-shadow:0 0 0 3px #d35d6818}
+.hero{padding:8px 3px 18px}.eyebrow{font-size:10px;letter-spacing:2.4px;color:#6d7fe0;font-weight:850}.hero h1{font-size:27px;line-height:1.25;letter-spacing:-.7px;margin:8px 0 7px}.hero h1 span{color:var(--primary)}.hero p{font-size:12px;color:#8c97aa;line-height:1.7;margin:0;max-width:520px}
+.view{display:none;animation:fade .18s ease}.view.active{display:block}@keyframes fade{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{background:var(--surface);border:1px solid rgba(230,235,245,.95);border-radius:var(--radius);padding:19px;box-shadow:var(--shadow);margin-bottom:14px}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px}.card-title{font-size:15px;font-weight:850}.card-desc{font-size:10px;color:#9aa4b4;margin-top:4px}
+.text-btn{border:0;background:transparent;color:#8b96a9;font-size:12px;padding:7px 3px}.text-btn:active{color:var(--primary)}
+textarea{display:block;width:100%;min-height:145px;resize:vertical;border:1px solid #e7ebf4;border-radius:15px;background:#fafbff;padding:15px;color:#39455b;font-size:13px;line-height:1.85;outline:none}
+textarea:focus,input:focus,select:focus{border-color:#aeb9ff;box-shadow:0 0 0 3px #596fe615}textarea::placeholder,input::placeholder{color:#b5bdca}
+.counter{display:flex;justify-content:space-between;color:#a4adba;font-size:10px;margin-top:8px}
+.section-label{font-size:13px;font-weight:850;margin:18px 0 11px;display:flex;align-items:center;gap:7px}.section-label:before{content:"";width:3px;height:13px;border-radius:4px;background:var(--primary)}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.field{min-width:0;display:flex;flex-direction:column;gap:7px}.field label{font-size:10px;color:#78849a;font-weight:750}.field select,.field input{width:100%;height:43px;border:1px solid #e8ecf3;border-radius:12px;background:#fff;padding:0 11px;color:#455168;font-size:12px;outline:none}
+.toggles{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}.toggle{display:flex;align-items:center;gap:7px;padding:9px 11px;border:1px solid #e8ecf3;border-radius:12px;background:#fff;color:#6e7a90;font-size:11px}.toggle input{accent-color:var(--primary);width:14px;height:14px;margin:0}.toggle:has(input:checked){border-color:#cbd2ff;background:#f5f6ff;color:#5266d8}
+.extra{margin-top:14px}.extra input{height:44px;border:1px solid #e8ecf3;border-radius:12px;padding:0 12px;width:100%;font-size:12px;outline:none}
+.primary-btn{width:100%;height:51px;border:0;border-radius:15px;background:linear-gradient(105deg,#7587f3,#5066dd);color:#fff;font-size:14px;font-weight:850;letter-spacing:.2px;box-shadow:0 9px 20px #596fe633;margin-top:15px}.primary-btn:disabled{opacity:.6;cursor:wait}.micro-note{text-align:center;color:#a7b0bd;font-size:10px;margin-top:9px}
+.result-card{border:1px solid #e9edf5;border-radius:15px;padding:14px;margin-top:11px;background:#fff}.result-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}.result-tag{font-size:10px;font-weight:850;letter-spacing:1px;color:#8794ad}.copy-btn{border:1px solid #e3e8f3;background:#fff;color:#64718a;border-radius:9px;padding:7px 10px;font-size:10px}.result-text{font-size:13px;line-height:1.9;color:#39455a;white-space:pre-wrap;overflow-wrap:anywhere}.result-meta{text-align:right;color:#aab2bf;font-size:10px;margin-top:8px}
+.empty{padding:35px 15px;text-align:center;color:#a2adbc}.empty-icon{width:62px;height:62px;border-radius:20px;background:linear-gradient(145deg,#f0f2ff,#f9faff);display:grid;place-items:center;margin:0 auto 12px;color:#8292ee;font-size:27px}.empty strong{display:block;font-size:13px;color:#758198}.empty p{font-size:11px;line-height:1.7;margin:6px 0 0}
+.error{display:none;padding:12px;border-radius:12px;background:#fff6f6;border:1px solid #f2d8dc;color:#b54d5a;font-size:11px;line-height:1.7;white-space:pre-wrap;margin-top:12px}.error.show{display:block}
+.page-heading{padding:9px 3px 15px}.page-heading h2{font-size:23px;margin:0 0 5px}.page-heading p{font-size:11px;color:#929daf;margin:0}
+.setting-section{padding:16px 0;border-top:1px solid #edf0f5}.setting-section:first-of-type{border-top:0;padding-top:2px}.setting-section h3{font-size:13px;margin:0 0 12px}.setting-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.setting-grid .wide{grid-column:1/-1}.key-wrap{display:flex;gap:7px}.key-wrap input{flex:1;min-width:0}.small-btn{height:42px;border:1px solid #e5eaf3;border-radius:11px;background:#fff;color:#68758c;padding:0 11px;font-size:11px;white-space:nowrap}.save-row{display:flex;gap:9px;margin-top:13px}.save-btn{flex:1;height:44px;border:0;border-radius:12px;background:var(--primary);color:white;font-size:12px;font-weight:800}.clear-btn{height:44px;border:1px solid #e7ebf3;border-radius:12px;background:#fff;color:#9b6570;padding:0 14px;font-size:11px}.hint{font-size:10px;color:#9aa5b5;line-height:1.7;margin-top:11px}.secure-note{display:flex;gap:9px;align-items:flex-start;padding:12px;border-radius:13px;background:#f4f8ff;color:#71809a;font-size:10px;line-height:1.65;margin-top:13px}.secure-note b{color:#5368d8}
+.history-list{display:flex;flex-direction:column;gap:10px}.history-item{padding:14px;border:1px solid #e8edf4;border-radius:14px;background:#fff}.history-item h4{font-size:12px;margin:0 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.history-item p{font-size:11px;color:#8792a5;line-height:1.6;margin:0 0 9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.history-meta{display:flex;justify-content:space-between;align-items:center;color:#a5afbd;font-size:10px}.history-actions{display:flex;gap:7px}.history-actions button{border:1px solid #e6eaf2;background:white;color:#69768d;border-radius:8px;padding:6px 9px;font-size:10px}
+/* Fixed bottom status + navigation dock. */
+.bottom-dock{position:fixed;z-index:20;left:0;right:0;bottom:0;padding:0 14px max(10px,env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid rgba(226,231,241,.95)}
+.bottom-inner{max-width:730px;margin:0 auto}.bottom-status{height:31px;display:flex;align-items:center;justify-content:space-between;color:#929daf;font-size:9px;padding:0 4px}.bottom-status-left{display:flex;align-items:center;gap:7px}.bottom-status .dot{width:6px;height:6px}.nav{display:grid;grid-template-columns:repeat(3,1fr);height:56px;align-items:center}.nav-btn{border:0;background:transparent;color:#9aa4b4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10px;font-weight:700;height:52px}.nav-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.nav-btn.active{color:var(--primary)}.nav-btn.active svg{filter:drop-shadow(0 3px 5px #596fe633)}
+@media(min-width:700px){.app{padding-left:24px;padding-right:24px}.safe-top{height:18px}.hero h1{font-size:31px}.card{padding:22px}.desktop-two{display:grid;grid-template-columns:1fr 1fr;gap:14px}}
+@media(max-width:390px){.app{padding-left:12px;padding-right:12px}.card{padding:15px}.hero h1{font-size:24px}.top-status{font-size:9px;padding:7px 9px}.brand-title{font-size:14px}.field-grid{gap:8px}.toggle{padding:8px 9px}}
 </style>
 </head>
 <body>
-<div class="shell">
-<header>
-  <div class="brand"><div class="logo">文</div><div><b>朋友圈文案改写器</b><small>让每一条分享，都更自然一点</small></div></div>
-  <div class="head-right"><span class="pill">Android APP V1.0</span><div class="status" id="status"><i class="dot"></i><span id="statusText">等待 API 配置</span></div></div>
-</header>
+<div class="app">
+  <div class="safe-top" aria-hidden="true"></div>
+  <header class="topbar">
+    <div class="brand"><div class="logo">文</div><div><div class="brand-title">朋友圈文案改写器</div><div class="brand-sub">让每一条分享，都更自然一点</div></div></div>
+    <div class="top-status"><i class="dot" id="topDot"></i><span id="topStatus">API 未配置</span></div>
+  </header>
 
-<section class="hero">
-  <div class="kicker">AI COPYWRITER · MOMENTS</div>
-  <h1>把原文变成<span>更好的朋友圈</span></h1>
-  <p>粘贴原文，选择表达风格，一键生成多条自然、不生硬的新文案。</p>
-</section>
+  <main>
+    <section class="view active" id="viewRewrite">
+      <div class="hero"><div class="eyebrow">AI COPYWRITER · MOMENTS</div><h1>让每一条朋友圈<br><span>自然、有温度</span></h1><p>粘贴原文，选择表达风格，一键生成多条不生硬的新文案。</p></div>
 
-<section class="layout">
-  <div class="panel">
-    <div class="panel-head"><div><div class="panel-title">原始文案</div><div class="sub">粘贴你想改写的内容</div></div><button class="linkbtn" id="clearBtn">清空</button></div>
-    <textarea id="source" maxlength="10000" placeholder="例如：今天给大家分享一款很好吃的潮汕牛肉丸，煮火锅、煮汤都很合适，喜欢的朋友可以找我了解……"></textarea>
-    <div class="counter"><span>支持最多 10,000 字</span><span id="countText">0 / 10000</span></div>
+      <section class="card">
+        <div class="card-head"><div><div class="card-title">原始文案</div><div class="card-desc">粘贴你想改写的内容</div></div><button class="text-btn" id="clearSource">清空内容</button></div>
+        <textarea id="source" maxlength="10000" placeholder="例如：今天给大家分享一款很好吃的潮汕牛肉丸，煮火锅、煮汤都很合适，喜欢的朋友可以找我了解……"></textarea>
+        <div class="counter"><span>支持最多 10,000 字</span><span id="count">0 / 10000</span></div>
 
-    <div class="section-title">改写设置</div>
-    <div class="grid">
-      <div class="field"><label for="scene">文案场景</label><select id="scene">
-        <option value="通用朋友圈">通用朋友圈</option><option value="产品或商品分享" selected>产品 / 商品分享</option><option value="日常生活分享">日常生活分享</option><option value="活动或营销推广">活动 / 营销推广</option><option value="客户反馈或使用体验">客户反馈 / 使用体验</option><option value="节日祝福">节日祝福</option>
-      </select></div>
-      <div class="field"><label for="tone">表达风格</label><select id="tone">
-        <option value="自然口语化，像真人日常发朋友圈，不要有明显AI腔" selected>自然口语化</option><option value="真诚朴实，不夸张、不油腻，表达可信">真诚朴实</option><option value="温暖亲切，有生活气息，语气友好">温暖亲切</option><option value="轻松幽默，有趣但不过度玩梗">轻松幽默</option><option value="专业可信，重点清晰，表达有条理">专业可信</option><option value="简洁有力，删掉冗余表达">简洁有力</option>
-      </select></div>
-      <div class="field"><label for="length">文案长度</label><select id="length">
-        <option value="与原文大致相近" selected>与原文相近</option><option value="约50至80个汉字">短文案（50–80字）</option><option value="约80至150个汉字">中等（80–150字）</option><option value="约150至250个汉字">长文案（150–250字）</option>
-      </select></div>
-      <div class="field"><label for="num">生成数量</label><select id="num"><option>1</option><option>2</option><option selected>3</option><option>5</option></select></div>
-    </div>
+        <div class="section-label">改写偏好</div>
+        <div class="field-grid">
+          <div class="field"><label for="scene">文案场景</label><select id="scene"><option value="通用朋友圈">通用朋友圈</option><option value="产品或商品分享" selected>产品 / 商品分享</option><option value="日常生活分享">日常生活分享</option><option value="活动或营销推广">活动 / 营销推广</option><option value="客户反馈或使用体验">客户反馈 / 使用体验</option><option value="节日祝福">节日祝福</option></select></div>
+          <div class="field"><label for="tone">表达风格</label><select id="tone"><option value="自然口语化，像真人日常发朋友圈，不要有明显AI腔" selected>自然口语化</option><option value="真诚朴实，不夸张、不油腻，表达可信">真诚朴实</option><option value="温暖亲切，有生活气息，语气友好">温暖亲切</option><option value="轻松幽默，有趣但不过度玩梗">轻松幽默</option><option value="专业可信，重点清晰，表达有条理">专业可信</option><option value="简洁有力，删掉冗余表达">简洁有力</option></select></div>
+          <div class="field"><label for="length">文案长度</label><select id="length"><option value="与原文大致相近" selected>与原文相近</option><option value="约50至80个汉字">短文案（50–80字）</option><option value="约80至150个汉字">中等（80–150字）</option><option value="约150至250个汉字">长文案（150–250字）</option></select></div>
+          <div class="field"><label for="num">生成数量</label><select id="num"><option>1</option><option>2</option><option selected>3</option><option>5</option></select></div>
+        </div>
+        <div class="toggles">
+          <label class="toggle"><input id="facts" type="checkbox" checked>保留原文事实</label>
+          <label class="toggle"><input id="antiFold" type="checkbox" checked>简短自然</label>
+          <label class="toggle"><input id="noPrice" type="checkbox">不出现价格</label>
+        </div>
+        <div class="extra field"><label for="custom">额外要求（选填）</label><input id="custom" type="text" placeholder="例如：不要太像广告、不要表情符号"></div>
+        <button class="primary-btn" id="generate">✦　AI 一键生成文案</button>
+        <div class="micro-note">模型请求使用 HTTPS · API Key 在安卓端本机加密保存</div>
+        <div class="error" id="error"></div>
+      </section>
 
-    <div class="checks">
-      <label class="check"><input id="facts" type="checkbox" checked><span><strong>保留原文事实</strong><small>产品名称、规格、价格、时间、活动条件不擅自修改</small></span></label>
-      <label class="check"><input id="antiFold" type="checkbox" checked><span><strong>朋友圈简短自然</strong><small>减少冗余和过多分段，尽量降低被折叠的概率</small></span></label>
-      <label class="check"><input id="noPrice" type="checkbox"><span><strong>不出现价格金额</strong><small>自动去掉报价和金额信息</small></span></label>
-    </div>
-    <div class="field custom"><label for="custom">额外要求（选填）</label><input id="custom" type="text" placeholder="例如：不要太像广告、不要表情符号、结尾加一句互动引导"></div>
+      <section class="card" id="resultPanel">
+        <div class="card-head"><div><div class="card-title">改写结果</div><div class="card-desc" id="resultDesc">生成的文案会显示在这里</div></div><button class="text-btn" id="copyAll" disabled>复制全部</button></div>
+        <div id="empty" class="empty"><div class="empty-icon">✎</div><strong>等待你的第一段文案</strong><p>输入原文并完成 API 配置<br>点击生成，即可获得不同表达版本</p></div>
+        <div id="results"></div>
+      </section>
+    </section>
 
-    <div class="config">
-      <div class="config-head"><b>大模型 API 配置</b><div class="config-actions"><button class="linkbtn" id="clearKeyBtn" type="button">清除密钥</button><button class="linkbtn" id="testBtn" type="button">测试连接</button></div></div>
-      <div class="config-grid">
-        <div class="field"><label for="provider">接口预设</label><select id="provider">
-          <option value="custom">自定义兼容接口</option><option value="deepseek" selected>DeepSeek</option><option value="openai">OpenAI</option><option value="qwen">阿里云百炼（兼容模式）</option><option value="silicon">硅基流动</option>
-        </select></div>
-        <div class="field"><label for="model">模型名称</label><input id="model" value="deepseek-chat" placeholder="例如 deepseek-chat"></div>
-        <div class="field" style="grid-column:1/-1"><label for="baseUrl">API Base URL</label><input id="baseUrl" value="https://api.deepseek.com" placeholder="https://api.example.com/v1"></div>
-        <div class="field" style="grid-column:1/-1"><label for="apiKey">API Key</label><input id="apiKey" type="password" autocomplete="off" placeholder="粘贴你的 API Key（安卓端会加密保存在本机）"></div>
-      </div>
-      <div class="config-note"><strong>隐私提示：</strong>安卓 APP 会使用 Android Keystore 对 API Key 加密并保存在本机，重新打开应用后自动填入；密钥不会以明文写入配置文件。电脑浏览器版仅保存在当前页面内存。API 请求通过 HTTPS 发送至你选择的模型服务商，请勿在公共设备上填写密钥。</div>
-    </div>
+    <section class="view" id="viewHistory">
+      <div class="page-heading"><h2>改写历史</h2><p>最近生成的文案会保存在本机，方便随时查看和复用。</p></div>
+      <section class="card"><div class="card-head"><div><div class="card-title">最近记录</div><div class="card-desc">最多保留最近 30 次生成记录</div></div><button class="text-btn" id="clearHistory">清空历史</button></div><div class="history-list" id="historyList"></div><div class="empty" id="historyEmpty"><div class="empty-icon">◷</div><strong>还没有改写记录</strong><p>生成过的文案会自动出现在这里</p></div></section>
+    </section>
 
-    <button class="generate" id="generateBtn">✦　AI 一键生成文案　→</button>
-    <div class="tiny-note">安卓原生网络请求 · 手机安装即用 · 无需 Node.js</div>
+    <section class="view" id="viewSettings">
+      <div class="page-heading"><h2>设置</h2><p>管理模型服务、API 密钥和默认改写偏好。</p></div>
+      <section class="card">
+        <div class="card-head"><div><div class="card-title">大模型 API 配置</div><div class="card-desc">配置一次，后续打开应用自动读取</div></div><span class="top-status"><i class="dot" id="settingsDot"></i><span id="settingsStatus">未配置</span></span></div>
+        <div class="setting-section">
+          <h3>模型服务</h3>
+          <div class="setting-grid">
+            <div class="field"><label for="provider">接口预设</label><select id="provider"><option value="deepseek" selected>DeepSeek</option><option value="openai">OpenAI</option><option value="qwen">阿里云百炼</option><option value="silicon">硅基流动</option><option value="custom">自定义兼容接口</option></select></div>
+            <div class="field"><label for="model">模型名称</label><input id="model" value="deepseek-chat" placeholder="例如 deepseek-chat"></div>
+            <div class="field wide"><label for="baseUrl">API Base URL</label><input id="baseUrl" value="https://api.deepseek.com" placeholder="https://api.example.com/v1" autocapitalize="off"></div>
+            <div class="field wide"><label for="apiKey">API Key</label><div class="key-wrap"><input id="apiKey" type="password" autocomplete="off" placeholder="粘贴你的 API Key" autocapitalize="off"><button class="small-btn" id="toggleKey" type="button">显示</button></div></div>
+          </div>
+          <div class="save-row"><button class="save-btn" id="saveSettings">保存配置</button><button class="clear-btn" id="clearKey">清除密钥</button></div>
+          <div class="hint">更换模型服务商后，请确认模型名称与 API 地址匹配。API Key 不会写入普通网页存储。</div>
+          <div class="secure-note"><span>🔒</span><span><b>本机加密保护</b><br>安卓 APP 使用 Android Keystore 加密保存 API Key，重新打开应用会自动填入。此 HTML 预览在电脑浏览器中不会持久化保存密钥。</span></div>
+        </div>
+        <div class="setting-section">
+          <h3>连接测试</h3>
+          <p class="hint" style="margin:0 0 10px">测试当前模型配置是否能够正常访问。</p>
+          <button class="small-btn" id="testConnection" style="width:100%;height:44px">测试 API 连接</button>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-title">应用信息</div>
+        <div class="hint">AI 朋友圈文案改写器 · V2.0<br>正式 APK 将沿用原生 WebView 网络桥接和密钥加密保存功能。</div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<div class="bottom-dock">
+  <div class="bottom-inner">
+    <div class="bottom-status"><div class="bottom-status-left"><i class="dot" id="bottomDot"></i><span id="bottomStatus">等待 API 配置</span></div><span>本机安全存储 · HTTPS 请求</span></div>
+    <nav class="nav" aria-label="主导航">
+      <button class="nav-btn active" data-view="Rewrite"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg><span>改写</span></button>
+      <button class="nav-btn" data-view="History"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>历史</span></button>
+      <button class="nav-btn" data-view="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 3.1-.2-.1a1.7 1.7 0 0 0-1.9.1 1.7 1.7 0 0 0-.8 1.5v.2H9v-.2a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.2.1-1.8-3.1.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-.9H2.8v-3.6H3a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.2L6 4.5l.2.1a1.7 1.7 0 0 0 1.9-.3 1.7 1.7 0 0 0 .9-1.5v-.2h3.6v.2a1.7 1.7 0 0 0 1.1 1.6 1.7 1.7 0 0 0 1.8-.3l.2-.1 1.8 3.1-.1.2a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5.8h.2v3.6h-.2a1.7 1.7 0 0 0-1.7 1.7Z"/></svg><span>设置</span></button>
+    </nav>
   </div>
-
-  <div class="panel output">
-    <div class="panel-head outhead"><div><div class="panel-title">改写结果</div><div class="sub" id="resultDesc">生成的文案会显示在这里</div></div><div class="out-actions"><button class="outline" id="copyAll" disabled>复制全部</button></div></div>
-    <div class="empty" id="empty"><div class="empty-icon">✎</div><b>等待你的第一段文案</b><p>填写左侧原文并配置 API<br>点击生成，即可获得不同表达版本</p></div>
-    <div class="loading hidden" id="loading"><div class="spinner"></div><b>AI 正在认真改写</b><p>正在生成不同表达版本，请稍候…</p></div>
-    <div class="error hidden" id="error"></div>
-    <div class="results" id="results"></div>
-    <div class="foot"><span>发布前请核对产品信息、价格及事实细节。</span><span id="modelLabel"></span></div>
-  </div>
-</section>
-<footer>AI朋友圈文案改写工具 · Android APP版</footer>
 </div>
 
 <script>
 (() => {
   const $ = id => document.getElementById(id);
-  let latest = [];
-  let busy = false;
-
   const presets = {
-    deepseek: {url:"https://api.deepseek.com", model:"deepseek-chat"},
-    openai: {url:"https://api.openai.com/v1", model:"gpt-4o-mini"},
-    qwen: {url:"https://dashscope.aliyuncs.com/compatible-mode/v1", model:"qwen-plus"},
-    silicon: {url:"https://api.siliconflow.cn/v1", model:"Qwen/Qwen2.5-7B-Instruct"},
-    custom: {url:"", model:""}
+    deepseek:{url:"https://api.deepseek.com",model:"deepseek-chat"},
+    openai:{url:"https://api.openai.com/v1",model:"gpt-4o-mini"},
+    qwen:{url:"https://dashscope.aliyuncs.com/compatible-mode/v1",model:"qwen-plus"},
+    silicon:{url:"https://api.siliconflow.cn/v1",model:"Qwen/Qwen2.5-7B-Instruct"},
+    custom:{url:"",model:""}
   };
-
-  function setStatus(kind, message) {
-    $("status").className = "status " + (kind || "");
-    $("statusText").textContent = message;
+  let latest=[],busy=false,history=[];
+  const historyKey="moments_copywriter_history_v1";
+  function setStatus(kind,message){
+    ["topDot","bottomDot","settingsDot"].forEach(id=>{$(id).className="dot "+(kind||"")});
+    $("topStatus").textContent=message;$("bottomStatus").textContent=message;$("settingsStatus").textContent=message;
   }
-  function showError(message) {
-    $("error").textContent = message;
-    $("error").classList.remove("hidden");
-  }
-  function clearError() {
-    $("error").textContent = "";
-    $("error").classList.add("hidden");
-  }
-  function setBusy(value) {
-    busy = value;
-    $("generateBtn").disabled = value;
-    $("generateBtn").textContent = value ? "正在生成，请稍候…" : "✦　AI 一键生成文案　→";
-    $("loading").classList.toggle("hidden", !value);
-    if (value) {
-      $("empty").classList.add("hidden");
-      $("results").innerHTML = "";
-      clearError();
-    }
-  }
-  function endpointFromBase(base) {
-    let value = base.trim().replace(/\/+$/, "");
-    if (!value) throw new Error("请填写 API Base URL。");
-    if (/\/chat\/completions$/i.test(value)) return value;
-    if (/\/v\d+$/i.test(value)) return value + "/chat/completions";
-    return value + "/v1/chat/completions";
-  }
-  function promptFor(data) {
-    const rules = [
-      "你是一名专业的中文微信朋友圈文案编辑，擅长将用户提供的文案改写成自然、真实、有温度的表达。",
-      "文案场景：" + data.scene + "。",
-      "表达风格：" + data.tone + "。",
-      "篇幅要求：" + data.length + "。",
-      data.facts ? "保留原文所有重要事实，包括产品名称、规格、价格、时间、地点、数量、活动条件；不得擅自改动或编造。" : "保留原文核心意思，不要编造具体事实。",
-      data.antiFold ? "适合微信朋友圈阅读，开头自然，减少冗余和过多分段，尽量简短自然。不能承诺平台一定不折叠。" : "",
-      data.noPrice ? "不得出现价格、金额、报价或具体数字金额。删除原文价格信息，但尽量保留其他事实。" : "",
-      data.custom ? "用户额外要求：" + data.custom : "",
-      "请生成 " + data.num + " 条彼此明显不同的版本，不要只替换同义词。",
-      "严格只返回 JSON 数组，格式为 [\"第一条文案\",\"第二条文案\"]。不要使用 Markdown 代码块，不要附加解释、编号或其他文字。"
-    ].filter(Boolean);
-    return rules.join("\n") + "\n\n【原始朋友圈文案】\n" + data.text;
-  }
-  function extractOutputs(content, expected) {
-    let raw = typeof content === "string" ? content : "";
-    if (Array.isArray(content)) raw = content.map(x => x.text || "").join("\n");
-    raw = raw.trim().replace(/^\x60{3}(?:json)?\s*/i, "").replace(/\s*\x60{3}$/i, "");
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed.map(x => String(x).trim()).filter(Boolean).slice(0, expected);
-      if (parsed && Array.isArray(parsed.outputs)) return parsed.outputs.map(x => String(x).trim()).filter(Boolean).slice(0, expected);
-    } catch (_) {}
-    const first = raw.indexOf("[");
-    const last = raw.lastIndexOf("]");
-    if (first >= 0 && last > first) {
-      try {
-        const parsed = JSON.parse(raw.slice(first, last + 1));
-        if (Array.isArray(parsed)) return parsed.map(x => String(x).trim()).filter(Boolean).slice(0, expected);
-      } catch (_) {}
-    }
-    const split = raw.split(/(?:^|\n)\s*(?:版本\s*)?[1-5][、.．:：)）]\s*/).map(x => x.trim()).filter(Boolean);
-    return split.length > 1 ? split.slice(0, expected) : (raw ? [raw] : []);
-  }
-
-  // Android APK uses a native HTTPS bridge to avoid WebView/browser CORS restrictions.
-  // In a normal desktop browser, the standard Fetch API remains the fallback.
-  let nativeRequestSequence = 0;
-  window.__nativeFetchPending = {};
-  window.__nativeFetchResult = function(id, status, body) {
-    const pending = window.__nativeFetchPending[id];
-    if (!pending) return;
-    delete window.__nativeFetchPending[id];
-    pending.resolve({
-      ok: status >= 200 && status < 300,
-      status,
-      text: async () => body
-    });
-  };
-  function apiFetch(url, options) {
-    if (window.AndroidApi && typeof window.AndroidApi.request === "function") {
-      return new Promise((resolve) => {
-        const id = "req_" + (++nativeRequestSequence) + "_" + Date.now();
-        const timer = setTimeout(() => {
-          delete window.__nativeFetchPending[id];
-          resolve({
-            ok: false,
-            status: 0,
-            text: async () => JSON.stringify({error:{message:"请求超时，请检查手机网络或 API 服务状态。"}})
-          });
-        }, 120000);
-        window.__nativeFetchPending[id] = {
-          resolve: (result) => { clearTimeout(timer); resolve(result); }
-        };
-        try {
-          window.AndroidApi.request(JSON.stringify({url, options}), id);
-        } catch (e) {
-          clearTimeout(timer);
-          delete window.__nativeFetchPending[id];
-          resolve({
-            ok: false,
-            status: 0,
-            text: async () => JSON.stringify({error:{message:e.message || "安卓网络请求失败"}})
-          });
-        }
-      });
-    }
-    return fetch(url, options);
-  }
-
-  async function callModel(data) {
-    const key = $("apiKey").value.trim();
-    if (!key) throw new Error("请先填写 API Key。");
-    if (!persistApiKey()) throw new Error("API Key 未能安全保存到本机，请重新输入或重启应用后再试。");
-    const url = endpointFromBase($("baseUrl").value);
-    const model = $("model").value.trim();
-    if (!model) throw new Error("请填写模型名称。");
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 90000);
-    try {
-      const response = await apiFetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + key
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            {role:"system", content:"你是严谨的中文朋友圈文案编辑。严格遵守用户要求，不得编造事实。输出必须符合用户指定格式。"},
-            {role:"user", content:promptFor(data)}
-          ],
-          temperature: 0.85,
-          max_tokens: 2200
-        }),
-        signal: controller.signal
-      });
-      const text = await response.text();
-      let json;
-      try { json = JSON.parse(text); }
-      catch (_) { throw new Error("接口返回内容无法解析（HTTP " + response.status + "）。请检查 API 地址或服务商兼容性。"); }
-      if (!response.ok) {
-        const msg = json && json.error && (json.error.message || json.error) || json.message || ("HTTP " + response.status);
-        throw new Error("模型接口请求失败：" + (typeof msg === "string" ? msg : JSON.stringify(msg)));
-      }
-      const content = json && json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content;
-      const outputs = extractOutputs(content, data.num);
-      if (!outputs.length) throw new Error("模型没有返回可用文案，请检查模型名称或重试。");
-      return outputs;
-    } catch (e) {
-      if (e.name === "AbortError") throw new Error("请求超时，请检查网络后重试。");
-      if (e instanceof TypeError) throw new Error("浏览器无法连接该 API。常见原因是服务商未开放浏览器跨域访问（CORS）、网络限制或 API 地址错误。请尝试服务商支持的兼容接口；若仍不支持跨域，则需要后端代理，单个 HTML 无法绕过浏览器安全限制。");
-      throw e;
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-  async function copyText(text, button) {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch (_) {
-      const t = document.createElement("textarea");
-      t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
-      document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove();
-    }
-    if (button) {
-      const old = button.textContent;
-      button.textContent = "已复制 ✓";
-      setTimeout(() => button.textContent = old, 1300);
-    }
-  }
-  function render(outputs) {
-    latest = outputs;
-    $("results").innerHTML = "";
-    $("empty").classList.add("hidden");
-    $("loading").classList.add("hidden");
-    $("error").classList.add("hidden");
-    $("copyAll").disabled = !outputs.length;
-    $("resultDesc").textContent = "已生成 " + outputs.length + " 条不同版本，选择喜欢的文案复制";
-    outputs.forEach((text, i) => {
-      const card = document.createElement("article");
-      card.className = "result";
-      const top = document.createElement("div");
-      top.className = "result-top";
-      const label = document.createElement("span");
-      label.className = "result-label";
-      label.textContent = "VERSION 0" + (i + 1);
-      const btn = document.createElement("button");
-      btn.className = "outline";
-      btn.textContent = "复制文案";
-      btn.addEventListener("click", () => copyText(text, btn));
-      top.append(label, btn);
-      const body = document.createElement("div");
-      body.className = "result-text";
-      body.textContent = text;
-      const meta = document.createElement("div");
-      meta.className = "result-meta";
-      meta.textContent = text.length + " 字";
-      card.append(top, body, meta);
-      $("results").appendChild(card);
-    });
-  }
-
-  $("source").addEventListener("input", () => {
-    $("countText").textContent = $("source").value.length + " / 10000";
-  });
-  $("provider").addEventListener("change", () => {
-    const p = presets[$("provider").value];
-    if (!p) return;
-    $("baseUrl").value = p.url;
-    $("model").value = p.model;
-  });
-  $("generateBtn").addEventListener("click", async () => {
-    if (busy) return;
-    const text = $("source").value.trim();
-    if (!text) { $("source").focus(); showError("请先输入需要改写的朋友圈原文。"); return; }
-    const data = {
-      text,
-      scene: $("scene").value,
-      tone: $("tone").value,
-      length: $("length").value,
-      num: Number($("num").value),
-      facts: $("facts").checked,
-      antiFold: $("antiFold").checked,
-      noPrice: $("noPrice").checked,
-      custom: $("custom").value.trim()
-    };
-    latest = [];
-    $("copyAll").disabled = true;
-    setBusy(true);
-    try {
-      const outputs = await callModel(data);
-      render(outputs);
-      $("modelLabel").textContent = "模型：" + $("model").value.trim();
-      setStatus("ok", "接口请求成功");
-    } catch (e) {
-      $("loading").classList.add("hidden");
-      $("empty").classList.add("hidden");
-      showError(e.message || "生成失败，请检查 API 配置。");
-      $("resultDesc").textContent = "本次生成未完成";
-      setStatus("err", "请求失败");
-    } finally {
-      busy = false;
-      $("generateBtn").disabled = false;
-      $("generateBtn").textContent = "✦　AI 一键生成文案　→";
-    }
-  });
-  $("testBtn").addEventListener("click", async () => {
-    if (busy) return;
-    const key = $("apiKey").value.trim();
-    if (!key) { showError("请先填写 API Key，再测试连接。"); return; }
-    if (!persistApiKey()) { showError("API Key 未能安全保存到本机，请检查应用存储权限后重试。"); return; }
-    const model = $("model").value.trim();
-    if (!model) { showError("请填写模型名称。"); return; }
-    $("testBtn").disabled = true;
-    $("testBtn").textContent = "测试中…";
-    clearError();
-    try {
-      const url = endpointFromBase($("baseUrl").value);
-      const response = await apiFetch(url, {
-        method:"POST",
-        headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
-        body:JSON.stringify({model,messages:[{role:"user",content:"请只回复：连接成功"}],max_tokens:20,temperature:0})
-      });
-      const body = await response.text();
-      let json;
-      try { json = JSON.parse(body); } catch (_) { throw new Error("响应无法解析，HTTP " + response.status); }
-      if (!response.ok) {
-        const msg = json && json.error && (json.error.message || json.error) || json && json.message || ("HTTP " + response.status);
-        throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
-      }
-      setStatus("ok","接口连接成功");
-      $("modelLabel").textContent = "模型：" + model;
-      alert("API 连接成功！");
-    } catch(e) {
-      setStatus("err","连接失败");
-      showError(e instanceof TypeError ? "浏览器无法连接 API，可能是跨域（CORS）限制。单文件网页不能绕过此限制。" : (e.message || "连接失败"));
-    } finally {
-      $("testBtn").disabled = false;
-      $("testBtn").textContent = "测试连接";
-    }
-  });
-  $("copyAll").addEventListener("click", () => {
-    if (latest.length) copyText(latest.map((x,i)=>"版本 "+(i+1)+"\n"+x).join("\n\n--------------------\n\n"), $("copyAll"));
-  });
-  function persistApiKey() {
-    const bridge = window.AndroidApi;
-    // Desktop browser fallback: do not persist credentials in browser storage.
-    if (!bridge || typeof bridge.saveApiKey !== "function") return true;
-    try {
-      const saved = bridge.saveApiKey($("apiKey").value);
-      if (!saved) {
-        setStatus("err", "API Key 保存失败");
-        return false;
-      }
-      if ($("apiKey").value.trim()) setStatus("ok", "API Key 已加密保存");
-      else setStatus("", "等待 API 配置");
-      return true;
-    } catch (e) {
-      setStatus("err", "API Key 保存失败");
-      return false;
-    }
-  }
-
-  function restoreApiKey() {
-    const bridge = window.AndroidApi;
-    if (!bridge || typeof bridge.getStoredApiKey !== "function") return;
-    try {
-      const savedKey = bridge.getStoredApiKey();
-      if (savedKey) {
-        $("apiKey").value = savedKey;
-        setStatus("ok", "已自动载入安全保存的 API Key");
-      }
-    } catch (e) {
-      setStatus("err", "读取已保存 API Key 失败");
-    }
-  }
-
-  let apiKeySaveTimer = null;
-  $("apiKey").addEventListener("input", () => {
-    if (apiKeySaveTimer) clearTimeout(apiKeySaveTimer);
-    apiKeySaveTimer = setTimeout(() => {
-      persistApiKey();
-      apiKeySaveTimer = null;
-    }, 450);
-  });
-  $("apiKey").addEventListener("change", persistApiKey);
-  $("apiKey").addEventListener("blur", persistApiKey);
-  window.addEventListener("pagehide", persistApiKey);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") persistApiKey();
-  });
-
-  $("clearKeyBtn").addEventListener("click", () => {
-    $("apiKey").value = "";
-    const bridge = window.AndroidApi;
-    if (bridge && typeof bridge.clearApiKey === "function") {
-      const cleared = bridge.clearApiKey();
-      if (!cleared) {
-        showError("清除本机保存的 API Key 失败，请稍后重试。");
-        return;
-      }
-    }
-    setStatus("", "API Key 已清除");
-    clearError();
-  });
-
-  restoreApiKey();
-
-  $("clearBtn").addEventListener("click", () => {
-    $("source").value = "";
-    $("countText").textContent = "0 / 10000";
-    $("results").innerHTML = "";
-    $("error").classList.add("hidden");
-    $("loading").classList.add("hidden");
-    $("empty").classList.remove("hidden");
-    $("copyAll").disabled = true;
-    $("resultDesc").textContent = "生成的文案会显示在这里";
-    $("modelLabel").textContent = "";
-    latest = [];
-    $("source").focus();
-  });
+  function showError(message){$("error").textContent=message;$("error").classList.add("show")}
+  function clearError(){$("error").textContent="";$("error").classList.remove("show")}
+  function endpointFromBase(base){let v=base.trim().replace(/\/+$/,"");if(!v)throw new Error("请填写 API Base URL。");if(/\/chat\/completions$/i.test(v))return v;if(/\/v\d+$/i.test(v))return v+"/chat/completions";return v+"/v1/chat/completions"}
+  function persistApiKey(){const bridge=window.AndroidApi;if(!bridge||typeof bridge.saveApiKey!=="function")return true;try{return !!bridge.saveApiKey($("apiKey").value)}catch(e){return false}}
+  function restoreApiKey(){const bridge=window.AndroidApi;if(!bridge||typeof bridge.getStoredApiKey!=="function")return;try{const k=bridge.getStoredApiKey();if(k){$("apiKey").value=k;setStatus("ok","API Key 已安全载入")}}catch(e){setStatus("err","密钥读取失败")}}
+  function saveNonSecretSettings(){try{localStorage.setItem("moments_copywriter_settings_v1",JSON.stringify({provider:$("provider").value,model:$("model").value,baseUrl:$("baseUrl").value}))}catch(e){}}
+  function loadNonSecretSettings(){try{const s=JSON.parse(localStorage.getItem("moments_copywriter_settings_v1")||"null");if(s){$("provider").value=s.provider||"deepseek";$("model").value=s.model||presets[$("provider").value].model;$("baseUrl").value=s.baseUrl||presets[$("provider").value].url}}catch(e){}}
+  function promptFor(d){return ["你是一名专业的中文微信朋友圈文案编辑，擅长将用户提供的文案改写成自然、真实、有温度的表达。","文案场景："+d.scene+"。","表达风格："+d.tone+"。","篇幅要求："+d.length+"。",d.facts?"保留原文所有重要事实，包括产品名称、规格、价格、时间、地点、数量、活动条件；不得擅自改动或编造。":"保留原文核心意思，不要编造具体事实。",d.antiFold?"适合微信朋友圈阅读，开头自然，减少冗余和过多分段，尽量简短自然。":"",d.noPrice?"不得出现价格、金额、报价或具体数字金额。删除原文价格信息，但尽量保留其他事实。":"",d.custom?"用户额外要求："+d.custom:"","请生成 "+d.num+" 条彼此明显不同的版本，不要只替换同义词。","严格只返回 JSON 数组，格式为 [\"第一条文案\",\"第二条文案\"]。不要附加解释。"].filter(Boolean).join("\n")+"\n\n【原始朋友圈文案】\n"+d.text}
+  function extractOutputs(content,n){let raw=typeof content==="string"?content:"";if(Array.isArray(content))raw=content.map(x=>x.text||"").join("\n");raw=raw.trim().replace(/^\x60{3}(?:json)?\s*/i,"").replace(/\s*\x60{3}$/i,"");try{const p=JSON.parse(raw);if(Array.isArray(p))return p.map(x=>String(x).trim()).filter(Boolean).slice(0,n);if(p&&Array.isArray(p.outputs))return p.outputs.map(x=>String(x).trim()).filter(Boolean).slice(0,n)}catch(e){}const a=raw.indexOf("["),b=raw.lastIndexOf("]");if(a>=0&&b>a){try{const p=JSON.parse(raw.slice(a,b+1));if(Array.isArray(p))return p.map(x=>String(x).trim()).filter(Boolean).slice(0,n)}catch(e){}}return raw?[raw]:[]}
+  let seq=0;window.__nativeFetchPending={};window.__nativeFetchResult=(id,status,body)=>{const p=window.__nativeFetchPending[id];if(!p)return;delete window.__nativeFetchPending[id];p.resolve({ok:status>=200&&status<300,status,text:async()=>body})};
+  function apiFetch(url,options){if(window.AndroidApi&&typeof window.AndroidApi.request==="function"){return new Promise(resolve=>{const id="req_"+(++seq)+"_"+Date.now();const timer=setTimeout(()=>{delete window.__nativeFetchPending[id];resolve({ok:false,status:0,text:async()=>JSON.stringify({error:{message:"请求超时，请检查网络。"}})})},120000);window.__nativeFetchPending[id]={resolve:r=>{clearTimeout(timer);resolve(r)}};try{window.AndroidApi.request(JSON.stringify({url,options}),id)}catch(e){clearTimeout(timer);delete window.__nativeFetchPending[id];resolve({ok:false,status:0,text:async()=>JSON.stringify({error:{message:e.message||"安卓网络请求失败"}})})}})}return fetch(url,options)}
+  async function requestModel(messages,maxTokens=2200){const key=$("apiKey").value.trim();if(!key)throw new Error("请先进入设置填写 API Key。");if(!persistApiKey())throw new Error("API Key 本机加密保存失败，请重试。");const model=$("model").value.trim();if(!model)throw new Error("请填写模型名称。");const url=endpointFromBase($("baseUrl").value);const response=await apiFetch(url,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model,messages,temperature:.85,max_tokens:maxTokens})});const body=await response.text();let json;try{json=JSON.parse(body)}catch(e){throw new Error("接口返回无法解析（HTTP "+response.status+")")};if(!response.ok){const m=json?.error?.message||json?.message||("HTTP "+response.status);throw new Error(typeof m==="string"?m:JSON.stringify(m))}return json}
+  function copyText(text,button){const done=()=>{if(button){const old=button.textContent;button.textContent="已复制 ✓";setTimeout(()=>button.textContent=old,1200)}};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done).catch(()=>fallback());else fallback();function fallback(){const t=document.createElement("textarea");t.value=text;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();done()}}
+  function renderResults(outputs){latest=outputs;$("results").innerHTML="";$("empty").style.display=outputs.length?"none":"block";$("copyAll").disabled=!outputs.length;$("resultDesc").textContent=outputs.length?"已生成 "+outputs.length+" 条版本":"生成的文案会显示在这里";outputs.forEach((txt,i)=>{const el=document.createElement("article");el.className="result-card";const top=document.createElement("div");top.className="result-top";const tag=document.createElement("span");tag.className="result-tag";tag.textContent="VERSION 0"+(i+1);const btn=document.createElement("button");btn.className="copy-btn";btn.textContent="复制文案";btn.onclick=()=>copyText(txt,btn);top.append(tag,btn);const body=document.createElement("div");body.className="result-text";body.textContent=txt;const meta=document.createElement("div");meta.className="result-meta";meta.textContent=txt.length+" 字";el.append(top,body,meta);$("results").appendChild(el)})}
+  function loadHistory(){try{history=JSON.parse(localStorage.getItem(historyKey)||"[]")}catch(e){history=[]}renderHistory()}
+  function saveHistory(source,outputs){const item={id:Date.now(),source,outputs,created:new Date().toLocaleString("zh-CN",{hour12:false})};history.unshift(item);history=history.slice(0,30);try{localStorage.setItem(historyKey,JSON.stringify(history))}catch(e){}renderHistory()}
+  function renderHistory(){$("historyList").innerHTML="";$("historyEmpty").style.display=history.length?"none":"block";history.forEach(item=>{const el=document.createElement("article");el.className="history-item";const h=document.createElement("h4");h.textContent=item.source||"未命名文案";const p=document.createElement("p");p.textContent=(item.outputs||[])[0]||"";const meta=document.createElement("div");meta.className="history-meta";const date=document.createElement("span");date.textContent=item.created||"";const actions=document.createElement("div");actions.className="history-actions";const use=document.createElement("button");use.textContent="重新使用";use.onclick=()=>{$("source").value=item.source||"";updateCount();renderResults(item.outputs||[]);switchView("Rewrite");window.scrollTo({top:0,behavior:"smooth"})};const cp=document.createElement("button");cp.textContent="复制结果";cp.onclick=()=>copyText((item.outputs||[]).join("\n\n"),cp);actions.append(use,cp);meta.append(date,actions);el.append(h,p,meta);$("historyList").appendChild(el)})}
+  function updateCount(){$("count").textContent=$("source").value.length+" / 10000"}
+  function switchView(name){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));$("view"+name).classList.add("active");document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.view===name));if(name==="History")renderHistory();window.scrollTo({top:0,behavior:"smooth"})}
+  document.querySelectorAll(".nav-btn").forEach(b=>b.addEventListener("click",()=>switchView(b.dataset.view)));
+  $("source").addEventListener("input",updateCount);
+  $("provider").addEventListener("change",()=>{const p=presets[$("provider").value];if(p){$("baseUrl").value=p.url;$("model").value=p.model}});
+  $("saveSettings").addEventListener("click",()=>{saveNonSecretSettings();if(!persistApiKey()){setStatus("err","密钥保存失败");alert("API Key 加密保存失败，请重试。");return}setStatus($("apiKey").value.trim()?"ok":"","配置已保存");alert("配置已保存！")});
+  $("apiKey").addEventListener("input",()=>{if(window.AndroidApi&&typeof window.AndroidApi.saveApiKey==="function")setTimeout(()=>persistApiKey(),350)});
+  $("toggleKey").addEventListener("click",()=>{const f=$("apiKey"),show=f.type==="password";f.type=show?"text":"password";$("toggleKey").textContent=show?"隐藏":"显示"});
+  $("clearKey").addEventListener("click",()=>{const bridge=window.AndroidApi;let ok=true;if(bridge&&typeof bridge.clearApiKey==="function")ok=!!bridge.clearApiKey();if(!ok){alert("清除密钥失败，请重试。");return}$("apiKey").value="";setStatus("","API Key 已清除")});
+  async function testConnection(){const key=$("apiKey").value.trim();if(!key){alert("请先填写 API Key。");return}const btn=$("testConnection");btn.disabled=true;btn.textContent="正在测试…";try{await requestModel([{role:"user",content:"请只回复：连接成功"}],20);setStatus("ok","API 连接成功");alert("API 连接成功！")}catch(e){setStatus("err","连接失败");alert(e.message||"连接失败")}finally{btn.disabled=false;btn.textContent="测试 API 连接"}}
+  $("testConnection").addEventListener("click",testConnection);
+  $("generate").addEventListener("click",async()=>{if(busy)return;const text=$("source").value.trim();if(!text){showError("请先输入需要改写的朋友圈原文。");$("source").focus();return}clearError();busy=true;const btn=$("generate");btn.disabled=true;btn.textContent="正在生成，请稍候…";try{const data={text,scene:$("scene").value,tone:$("tone").value,length:$("length").value,num:Number($("num").value),facts:$("facts").checked,antiFold:$("antiFold").checked,noPrice:$("noPrice").checked,custom:$("custom").value.trim()};const json=await requestModel([{role:"system",content:"你是严谨的中文朋友圈文案编辑。不得编造事实，按要求输出 JSON 数组。"},{role:"user",content:promptFor(data)}],2200);const content=json?.choices?.[0]?.message?.content;const outputs=extractOutputs(content,data.num);if(!outputs.length)throw new Error("模型没有返回可用文案，请重试。");renderResults(outputs);saveHistory(text,outputs);setStatus("ok","接口请求成功");$("resultPanel").scrollIntoView({behavior:"smooth",block:"start"})}catch(e){showError(e.message||"生成失败，请检查 API 配置。");setStatus("err","请求失败")}finally{busy=false;btn.disabled=false;btn.textContent="✦　AI 一键生成文案"}});
+  $("copyAll").addEventListener("click",()=>{if(latest.length)copyText(latest.map((x,i)=>"版本 "+(i+1)+"\n"+x).join("\n\n--------------------\n\n"),$("copyAll"))});
+  $("clearSource").addEventListener("click",()=>{$("source").value="";updateCount();clearError();renderResults([])});
+  $("clearHistory").addEventListener("click",()=>{if(!confirm("确定清空所有改写历史吗？"))return;history=[];localStorage.removeItem(historyKey);renderHistory()});
+  loadNonSecretSettings();restoreApiKey();loadHistory();
+  if($("apiKey").value.trim())setStatus("ok","API Key 已配置");
 })();
 </script>
 </body>

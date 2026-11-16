@@ -21,6 +21,19 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Validate bundled HTML JavaScript
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          html = Path("app/src/main/assets/html/index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script>(.*?)</script>", html, flags=re.S)
+          if not scripts:
+              raise SystemExit("No inline JavaScript found in bundled HTML")
+          Path("/tmp/moments-app.js").write_text("\n".join(scripts), encoding="utf-8")
+          PY
+          node --check /tmp/moments-app.js
+
       - name: Restore stable Android debug signing key
         uses: actions/cache@v4
         with:
@@ -35,10 +48,10 @@ jobs:
         run: gradle --no-daemon assembleDebug
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk AI-Moments-Copywriter.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk AI-Moments-Copywriter-v2.0.0.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: AI-Moments-Copywriter-APK
-          path: AI-Moments-Copywriter.apk
+          name: AI-Moments-Copywriter-APK-v2.0.0
+          path: AI-Moments-Copywriter-v2.0.0.apk
           if-no-files-found: error
